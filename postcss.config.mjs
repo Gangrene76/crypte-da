@@ -1,20 +1,7 @@
-{
-  "name": "crypte-da",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.105.4",
-    "next": "16.2.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
-  }
-}
+};
+
+export default config;
