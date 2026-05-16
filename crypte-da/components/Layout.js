@@ -29,6 +29,7 @@ export default function Layout({ children }) {
             <NavLink href="/">Accueil</NavLink>
             <NavLink href="/campagnes">Campagnes</NavLink>
             <NavLink href="/agenda">Agenda</NavLink>
+            <NavLink href="/mon-personnage">Mon Personnage</NavLink>
           </nav>
 
           {/* Mobile burger */}
