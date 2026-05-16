@@ -2,39 +2,34 @@ import AdminLayout from '../../components/AdminLayout'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 
-const EMPTY = { nom:'', description:'', image_url:'', univers:'', mj_id:'', statut:'active' }
+const EMPTY = { nom:'', description:'', image_url:'', univers:'', statut:'active' }
 
 export default function AdminCampagnes() {
   const [campagnes, setCampagnes] = useState([])
-  const [mjs, setMjs] = useState([])
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState(EMPTY)
   const [msg, setMsg] = useState(null)
 
   useEffect(() => { load() }, [])
   const load = async () => {
-    const [{ data: c }, { data: m }] = await Promise.all([
-      supabase.from('campagnes').select('*,mj(prenom)').order('created_at',{ascending:false}),
-      supabase.from('mj').select('*')
-    ])
-    setCampagnes(c||[]); setMjs(m||[])
+    const { data: c } = await supabase.from('campagnes').select('*').order('created_at',{ascending:false})
+    setCampagnes(c||[])
   }
 
   const save = async () => {
     setMsg(null)
-    const data = { ...form, mj_id: form.mj_id||null }
     if (!form.nom.trim()) { setMsg({ type:'error', text:'Le nom est requis.' }); return }
     if (editing === 'new') {
-      const { error } = await supabase.from('campagnes').insert(data)
+      const { error } = await supabase.from('campagnes').insert(form)
       if (error) setMsg({ type:'error', text:error.message }); else { setMsg({ type:'success', text:'Campagne créée !' }); setEditing(null); load() }
     } else {
-      const { error } = await supabase.from('campagnes').update(data).eq('id', editing)
+      const { error } = await supabase.from('campagnes').update(form).eq('id', editing)
       if (error) setMsg({ type:'error', text:error.message }); else { setMsg({ type:'success', text:'Enregistré !' }); setEditing(null); load() }
     }
   }
 
   const del = async (id) => { if (!confirm('Supprimer cette campagne et toutes ses sessions ?')) return; await supabase.from('campagnes').delete().eq('id',id); load() }
-  const startEdit = (c) => { setEditing(c.id); setForm({ nom:c.nom||'', description:c.description||'', image_url:c.image_url||'', univers:c.univers||'', mj_id:c.mj_id||'', statut:c.statut||'active' }); setMsg(null); window.scrollTo(0,0) }
+  const startEdit = (c) => { setEditing(c.id); setForm({ nom:c.nom||'', description:c.description||'', image_url:c.image_url||'', univers:c.univers||'', statut:c.statut||'active' }); setMsg(null); window.scrollTo(0,0) }
 
   return (
     <AdminLayout title="Campagnes">
@@ -50,12 +45,6 @@ export default function AdminCampagnes() {
           <h3 style={{ color:'var(--gold)', marginBottom:'1.5rem', fontSize:'1rem' }}>{editing==='new'?'Nouvelle campagne':'Modifier la campagne'}</h3>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
             <div style={{ gridColumn:'1/-1' }}><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Nom de la campagne *</label><input className="input-field" value={form.nom} onChange={e=>setForm({...form,nom:e.target.value})} placeholder="Ex: La Malédiction de Strahd" /></div>
-            <div><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Maître du Jeu</label>
-              <select className="input-field" value={form.mj_id} onChange={e=>setForm({...form,mj_id:e.target.value})}>
-                <option value="">— Choisir un MJ —</option>
-                {mjs.map(m => <option key={m.id} value={m.id}>{m.prenom}</option>)}
-              </select>
-            </div>
             <div><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Statut</label>
               <select className="input-field" value={form.statut} onChange={e=>setForm({...form,statut:e.target.value})}>
                 <option value="active">Active</option>
@@ -64,7 +53,7 @@ export default function AdminCampagnes() {
               </select>
             </div>
             <div><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Univers / Système</label><input className="input-field" value={form.univers} onChange={e=>setForm({...form,univers:e.target.value})} placeholder="Ex: D&D 5e, Pathfinder…" /></div>
-            <div><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>URL Image de couverture</label><input className="input-field" value={form.image_url} onChange={e=>setForm({...form,image_url:e.target.value})} placeholder="https://..." /></div>
+            <div style={{ gridColumn:'1/-1' }}><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>URL Image de couverture</label><input className="input-field" value={form.image_url} onChange={e=>setForm({...form,image_url:e.target.value})} placeholder="https://..." /></div>
             <div style={{ gridColumn:'1/-1' }}><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Description</label><textarea className="input-field" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Résumé de la campagne, ambiance, enjeux..." style={{ minHeight:120 }} /></div>
           </div>
           <div style={{ display:'flex', gap:'0.75rem', marginTop:'1.5rem' }}>
@@ -83,7 +72,6 @@ export default function AdminCampagnes() {
                 <span style={{ color:'var(--gold)', fontFamily:'Cinzel,serif' }}>{c.nom}</span>
                 <span className={`badge ${c.statut==='active'?'badge-future':c.statut==='terminee'?'badge-past':'badge-past'}`}>{c.statut==='active'?'Active':c.statut==='terminee'?'Terminée':'Pause'}</span>
               </div>
-              {c.mj && <div style={{ color:'var(--ash)', fontSize:'0.82rem' }}>MJ : {c.mj.prenom}</div>}
               {c.univers && <div style={{ color:'var(--ash)', fontSize:'0.82rem' }}>🌍 {c.univers}</div>}
             </div>
             <div style={{ display:'flex', gap:'0.5rem', flexShrink:0 }}>

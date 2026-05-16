@@ -11,7 +11,11 @@ export default function Home({ sessions, campagnes, mjs }) {
       <section style={{ minHeight:'55vh',display:'flex',alignItems:'center',justifyContent:'center',textAlign:'center',padding:'4rem 1.5rem',background:'linear-gradient(180deg,#0d0b09 0%,var(--stone) 100%)',position:'relative' }}>
         <div style={{ position:'absolute',inset:0,backgroundImage:'radial-gradient(ellipse at center,rgba(139,0,0,0.08) 0%,transparent 70%)',pointerEvents:'none' }} />
         <div style={{ position:'relative',maxWidth:700 }} className="fade-in">
+<<<<<<< HEAD
           <img src="https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/images/Gemini_Generated_Image_d03jczd03jczd03j.png" alt="D&A Logo" style={{ width:320, maxWidth:'85%', margin:'0 auto 1.5rem', display:'block', filter:'drop-shadow(0 0 30px rgba(201,168,76,0.5))' }} />
+=======
+          <div style={{ fontSize:'3rem',marginBottom:'1rem' }}/><img src="https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/images/Gemini_Generated_Image_d03jczd03jczd03j.png" alt="logo" style={{width:320,maxWidth:'85%',margin:'0 auto 1.5rem',display:'block'}} />
+>>>>>>> 20d5713e42e69af18c9dcaf56a56aaac58e64aee
           <h1 style={{ fontSize:'clamp(2rem,5vw,3.5rem)',color:'var(--gold)',marginBottom:'0.5rem',lineHeight:1.1 }}>La Crypte de D&A</h1>
           <div style={{ fontFamily:'Cinzel,serif',fontSize:'0.8rem',letterSpacing:'0.3em',color:'var(--ash)',marginBottom:'2rem',textTransform:'uppercase' }}>David & Arthur — Maîtres du Jeu</div>
           <p style={{ color:'var(--parchment)',opacity:0.8,fontSize:'1.1rem',lineHeight:1.7,marginBottom:'2.5rem' }}>Bienvenue dans notre antre. Ici s'écrivent les chroniques de nos aventures, les récits de nos campagnes, les hauts faits et les trépas de nos héros.</p>
