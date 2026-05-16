@@ -30,7 +30,7 @@ export default function AdminLayout({ children, title }) {
             { href:'/admin/campagnes', icon:'⚔️', label:'Campagnes' },
             { href:'/admin/sessions', icon:'📜', label:'Sessions' },
             { href:'/admin/personnages', icon:'🧙', label:'Personnages' },
-            { href:'/admin/codes', icon:'🔑', label:'Codes invitation' },
+            
             { href:'/admin/commentaires', icon:'💬', label:'Commentaires' },
           ].map(item => (
             <Link key={item.href} href={item.href} style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:'0.6rem', padding:'0.65rem 1rem', color: router.pathname===item.href?'var(--gold)':'var(--ash)', background: router.pathname===item.href?'rgba(201,168,76,0.08)':'transparent', borderLeft: router.pathname===item.href?'2px solid var(--gold)':'2px solid transparent', fontSize:'0.85rem', fontFamily:'Cinzel,serif', transition:'all 0.2s' }}>
