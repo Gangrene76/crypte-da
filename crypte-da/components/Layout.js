@@ -16,7 +16,7 @@ export default function Layout({ children }) {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 70 }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ fontSize: '1.8rem', lineHeight: 1 }}/><img src="https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/images/Gemini_Generated_Image_d03jczd03jczd03j.png" alt="logo" style={{width:40,height:40,objectFit:'contain'}} />
+              <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>🎲</span>
               <div>
                 <div style={{ fontFamily: 'Cinzel, serif', fontSize: '1.1rem', color: 'var(--gold)', letterSpacing: '0.1em', lineHeight: 1 }}>La Crypte de D&A</div>
                 <div style={{ fontFamily: 'Crimson Text, serif', fontSize: '0.75rem', color: 'var(--ash)', letterSpacing: '0.15em' }}>DAVID & ARTHUR — MAÎTRES DU JEU</div>
