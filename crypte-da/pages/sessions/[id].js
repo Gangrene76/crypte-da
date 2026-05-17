@@ -161,23 +161,6 @@ export default function SessionDetail({ session, campagne, medias, commentaires:
           </div>
         )}
 
-        {/* Médias */}
-        {medias.length > 0 && (
-          <div style={{ marginBottom:'2rem' }}>
-            <h2 style={{ color:'var(--gold)', fontSize:'1.1rem', marginBottom:'0.75rem' }}>Illustrations & Cartes</h2>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:'0.75rem' }}>
-              {medias.map(m => (
-                <a key={m.id} href={m.url} target="_blank" rel="noreferrer">
-                  <div style={{ borderRadius:2, overflow:'hidden', border:'1px solid rgba(201,168,76,0.2)', aspectRatio:'4/3' }}>
-                    <img src={m.url} alt={m.legende||''} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                  </div>
-                  {m.legende && <div style={{ color:'var(--ash)', fontSize:'0.75rem', marginTop:'0.3rem', textAlign:'center' }}>{m.legende}</div>}
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Commentaires */}
         <div className="divider"><span>💬</span></div>
         {approuves.length > 0 && (
@@ -195,6 +178,23 @@ export default function SessionDetail({ session, campagne, medias, commentaires:
                   </div>
                   {c.contenu && <p style={{ color:'var(--parchment)', lineHeight:1.7, margin:0 }}>{c.contenu}</p>}
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Médias */}
+        {medias.length > 0 && (
+          <div style={{ marginBottom:'2rem' }}>
+            <h2 style={{ color:'var(--gold)', fontSize:'1.1rem', marginBottom:'0.75rem' }}>Illustrations & Cartes</h2>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:'0.75rem' }}>
+              {medias.map(m => (
+                <a key={m.id} href={m.url} target="_blank" rel="noreferrer">
+                  <div style={{ borderRadius:2, overflow:'hidden', border:'1px solid rgba(201,168,76,0.2)', aspectRatio:'4/3' }}>
+                    <img src={m.url} alt={m.legende||''} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                  </div>
+                  {m.legende && <div style={{ color:'var(--ash)', fontSize:'0.75rem', marginTop:'0.3rem', textAlign:'center' }}>{m.legende}</div>}
+                </a>
               ))}
             </div>
           </div>
