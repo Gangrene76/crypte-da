@@ -76,6 +76,14 @@ export default function SessionDetail({ session, campagne, medias, commentaires:
           {session.date_session && <div style={{ color:'var(--ash)', fontSize:'0.9rem', fontFamily:'Cinzel,serif' }}>📅 {new Date(session.date_session).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>}
         </div>
 
+        {/* Image de couverture */}
+        {session.image_url && (
+          <div style={{ height:320, overflow:'hidden', borderRadius:2, marginBottom:'2rem', border:'1px solid rgba(201,168,76,0.2)', position:'relative' }}>
+            <img src={session.image_url} alt={session.titre} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(26,23,20,0.6) 0%, transparent 50%)' }} />
+          </div>
+        )}
+
         {/* Résumé */}
         {session.resume && (
           <div className="card" style={{ padding:'2rem', marginBottom:'2rem' }}>

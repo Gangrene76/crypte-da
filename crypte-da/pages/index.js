@@ -183,7 +183,14 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:'1rem' }}>
               {sessionsPassees.map(s => (
                 <Link key={s.id} href={`/sessions/${s.id}`} style={{ textDecoration:'none' }}>
-                  <div className="card-hover" style={{ background:'#1a1714', border:'1px solid rgba(201,168,76,0.15)', borderRadius:2, padding:'1.5rem' }}>
+                  <div className="card-hover" style={{ background:'#1a1714', border:'1px solid rgba(201,168,76,0.15)', borderRadius:2, overflow:'hidden' }}>
+                    {s.image_url && (
+                      <div style={{ height:160, overflow:'hidden', position:'relative' }}>
+                        <img src={s.image_url} alt={s.titre} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(26,23,20,0.8) 0%, transparent 60%)' }} />
+                      </div>
+                    )}
+                    <div style={{ padding:'1.25rem' }}>
                     <div style={{ display:'flex', gap:'0.5rem', marginBottom:'0.75rem', alignItems:'center' }}>
                       <span className="badge badge-past">📜 Passée</span>
                       {s.numero && <span style={{ color:'#9a9090', fontSize:'0.8rem' }}>#{s.numero}</span>}
@@ -192,6 +199,7 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
                     {s.campagnes && <div style={{ color:'#c9a84c', fontSize:'0.78rem', marginBottom:'0.5rem', opacity:0.8 }}>{s.campagnes.nom}</div>}
                     {s.date_session && <div style={{ color:'#9a9090', fontSize:'0.82rem' }}>📅 {new Date(s.date_session).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>}
                     {s.resume && <p style={{ color:'#9a9090', fontSize:'0.88rem', marginTop:'0.75rem', lineHeight:1.5, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{s.resume}</p>}
+                    </div>
                   </div>
                 </Link>
               ))}

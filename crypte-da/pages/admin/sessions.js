@@ -2,7 +2,7 @@ import AdminLayout from '../../components/AdminLayout'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 
-const EMPTY = { titre:'', numero:'', date_session:'', resume:'', statut:'passee', campagne_id:'' }
+const EMPTY = { titre:'', numero:'', date_session:'', resume:'', statut:'passee', campagne_id:'', image_url:'' }
 
 export default function AdminSessions() {
   const [sessions, setSessions] = useState([])
@@ -27,7 +27,7 @@ export default function AdminSessions() {
 
   const startEdit = async (s) => {
     setEditing(s.id)
-    setForm({ titre:s.titre||'', numero:s.numero||'', date_session:s.date_session||'', resume:s.resume||'', statut:s.statut||'passee', campagne_id:s.campagne_id||'' })
+    setForm({ titre:s.titre||'', numero:s.numero||'', date_session:s.date_session||'', resume:s.resume||'', statut:s.statut||'passee', campagne_id:s.campagne_id||'', image_url:s.image_url||'' })
     const [{ data: m }, { data: sm }] = await Promise.all([
       supabase.from('medias').select('*').eq('session_id',s.id),
       supabase.from('session_mjs').select('mj_id').eq('session_id',s.id)
@@ -117,6 +117,7 @@ export default function AdminSessions() {
               </div>
             </div>
 
+            <div style={{ gridColumn:'1/-1' }}><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>URL Image de couverture</label><input className="input-field" value={form.image_url} onChange={e=>setForm({...form,image_url:e.target.value})} placeholder="https://..." /></div>
             <div style={{ gridColumn:'1/-1' }}><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Résumé / Chronique</label><textarea className="input-field" value={form.resume} onChange={e=>setForm({...form,resume:e.target.value})} placeholder="Le récit de la session..." style={{ minHeight:160 }} /></div>
           </div>
 
