@@ -14,6 +14,7 @@ export default function AdminSessions() {
   const [medias, setMedias] = useState([])
   const [newMedia, setNewMedia] = useState({ url:'', legende:'', type:'photo' })
   const [msg, setMsg] = useState(null)
+  const [inscriptions, setInscriptions] = useState([])
 
   useEffect(() => { load() }, [])
   const load = async () => {
@@ -28,6 +29,8 @@ export default function AdminSessions() {
   const startEdit = async (s) => {
     setEditing(s.id)
     setForm({ titre:s.titre||'', numero:s.numero||'', date_session:s.date_session||'', resume:s.resume||'', statut:s.statut||'passee', campagne_id:s.campagne_id||'', image_url:s.image_url||'' })
+    const { data: insc } = await supabase.from('session_inscriptions').select('*,users(pseudo,avatar_url),personnages(nom,classe)').eq('session_id',s.id)
+    setInscriptions(insc||[])
     const [{ data: m }, { data: sm }] = await Promise.all([
       supabase.from('medias').select('*').eq('session_id',s.id),
       supabase.from('session_mjs').select('mj_id').eq('session_id',s.id)
@@ -120,6 +123,21 @@ export default function AdminSessions() {
             <div style={{ gridColumn:'1/-1' }}><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>URL Image de couverture</label><input className="input-field" value={form.image_url} onChange={e=>setForm({...form,image_url:e.target.value})} placeholder="https://..." /></div>
             <div style={{ gridColumn:'1/-1' }}><label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Résumé / Chronique</label><textarea className="input-field" value={form.resume} onChange={e=>setForm({...form,resume:e.target.value})} placeholder="Le récit de la session..." style={{ minHeight:160 }} /></div>
           </div>
+
+          {/* Inscriptions */}
+          {editing !== 'new' && inscriptions.length > 0 && (
+            <div style={{ marginTop:'1.5rem', paddingTop:'1.5rem', borderTop:'1px solid rgba(201,168,76,0.15)' }}>
+              <h4 style={{ color:'var(--gold)', fontSize:'0.9rem', marginBottom:'1rem' }}>⚔️ Inscrits ({inscriptions.length})</h4>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem' }}>
+                {inscriptions.map(i => (
+                  <div key={i.id} style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'0.4rem 0.75rem' }}>
+                    <span style={{ color:'var(--parchment)', fontFamily:'Cinzel,serif', fontSize:'0.8rem' }}>{i.personnages?.nom || i.users?.pseudo}</span>
+                    {i.personnages?.classe && <span style={{ color:'var(--ash)', fontSize:'0.72rem' }}>({i.personnages.classe})</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Médias */}
           {editing !== 'new' && (

@@ -1,70 +1,38 @@
 import Layout from '../../components/Layout'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
+import { getUser } from '../../lib/auth'
 
-
-function PersonnageSearch({ persoId, setPersoId, setMsg }) {
-  const [query, setQuery] = useState('')
-  const [resultats, setResultats] = useState([])
-  const [searching, setSearching] = useState(false)
-
-  const rechercher = async (val) => {
-    setQuery(val)
-    setPersoId('')
-    if (val.length < 2) { setResultats([]); return }
-    setSearching(true)
-    const { data } = await supabase.from('personnages').select('*').ilike('nom', `${val}%`).limit(8)
-    setResultats(data||[])
-    setSearching(false)
-  }
-
-  const persoSelectionne = resultats.find(p => p.id === persoId)
-
-  return (
-    <div style={{ marginBottom:'1rem' }}>
-      <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.5rem' }}>Votre personnage *</label>
-      <input
-        className="input-field"
-        value={persoSelectionne ? persoSelectionne.nom : query}
-        onChange={e=>rechercher(e.target.value)}
-        onFocus={e=>{ if(persoSelectionne){ setPersoId(''); setQuery(''); setResultats([]) }}}
-        placeholder="Tapez les premières lettres de votre nom..."
-        style={{ marginBottom:'0.5rem' }}
-      />
-      {searching && <div style={{ color:'var(--ash)', fontSize:'0.85rem', padding:'0.5rem' }}>Recherche...</div>}
-      {resultats.length > 0 && !persoId && (
-        <div style={{ border:'1px solid rgba(201,168,76,0.3)', borderRadius:2, overflow:'hidden' }}>
-          {resultats.map(p => (
-            <button key={p.id} onClick={()=>{ setPersoId(p.id); setQuery(p.nom); setResultats([]); setMsg(null) }}
-              style={{ display:'flex', alignItems:'center', gap:'0.75rem', padding:'0.75rem 1rem', width:'100%', background:'var(--stone-mid)', border:'none', borderBottom:'1px solid rgba(201,168,76,0.1)', cursor:'pointer', textAlign:'left', transition:'background 0.15s' }}
-              onMouseEnter={e=>e.currentTarget.style.background='rgba(201,168,76,0.1)'}
-              onMouseLeave={e=>e.currentTarget.style.background='var(--stone-mid)'}>
-              {p.avatar_url ? <img src={p.avatar_url} alt="" style={{ width:36, height:36, borderRadius:'50%', objectFit:'cover', flexShrink:0 }} /> : <span style={{ fontSize:'1.5rem', flexShrink:0 }}>🧙</span>}
-              <div>
-                <div style={{ color:'var(--gold)', fontFamily:'Cinzel,serif', fontSize:'0.9rem' }}>{p.nom}</div>
-                <div style={{ color:'var(--ash)', fontSize:'0.78rem' }}>{[p.race,p.classe,p.niveau?`Niv.${p.niveau}`:null].filter(Boolean).join(' · ')}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-      {query.length >= 2 && resultats.length === 0 && !searching && (
-        <div style={{ color:'var(--ash)', fontSize:'0.85rem', padding:'0.5rem', fontStyle:'italic' }}>Aucun personnage trouvé.</div>
-      )}
-    </div>
-  )
-}
-
-export default function SessionDetail({ session, campagne, medias, commentaires: initCommentaires, personnages }) {
+export default function SessionDetail({ session, campagne, medias, commentaires: initCommentaires, inscriptions: initInscriptions }) {
   const [commentaires, setCommentaires] = useState(initCommentaires)
-  const [persoId, setPersoId] = useState('')
-  const [mdp, setMdp] = useState('')
+  const [inscriptions, setInscriptions] = useState(initInscriptions)
+  const [user, setUser] = useState(null)
+  const [mesPersonnages, setMesPersonnages] = useState([])
+  const [persoCommentId, setPersoCommentId] = useState('')
+  const [persoInscritId, setPersoInscritId] = useState('')
   const [note, setNote] = useState(0)
   const [contenu, setContenu] = useState('')
-  const [sending, setSending] = useState(false)
   const [msg, setMsg] = useState(null)
-  const [etape, setEtape] = useState(1) // 1=choisir perso, 2=note+commentaire
+  const [msgInscrit, setMsgInscrit] = useState(null)
+  const [sending, setSending] = useState(false)
+  const [dejaInscrit, setDejaInscrit] = useState(false)
+
+  useEffect(() => {
+    const u = getUser()
+    if (u) {
+      setUser(u)
+      loadMesPersonnages(u.id)
+      if (session?.statut === 'future') {
+        setDejaInscrit(inscriptions.some(i => i.user_id === u.id))
+      }
+    }
+  }, [])
+
+  const loadMesPersonnages = async (userId) => {
+    const { data } = await supabase.from('personnages').select('*').eq('user_id', userId)
+    setMesPersonnages(data||[])
+  }
 
   if (!session) return <Layout><div style={{padding:'3rem',textAlign:'center',color:'var(--ash)'}}>Session introuvable.</div></Layout>
 
@@ -72,32 +40,43 @@ export default function SessionDetail({ session, campagne, medias, commentaires:
   const moyenneNote = approuves.filter(c=>c.note).length > 0
     ? (approuves.filter(c=>c.note).reduce((acc,c)=>acc+c.note,0)/approuves.filter(c=>c.note).length).toFixed(1) : null
 
-  const persoSelectionne = personnages.find(p => p.id === persoId)
-
-  const validerPerso = async () => {
-    setMsg(null)
-    if (!persoId) { setMsg({ type:'error', text:'Choisissez votre personnage.' }); return }
-    if (!mdp) { setMsg({ type:'error', text:'Entrez votre mot de passe.' }); return }
-    const { data } = await supabase.from('personnages').select('id,mot_de_passe').eq('id', persoId).single()
-    if (!data || data.mot_de_passe !== mdp) { setMsg({ type:'error', text:'Mot de passe incorrect.' }); return }
-    setEtape(2); setMsg(null)
+  // Inscription à une session future
+  const sInscrire = async () => {
+    setMsgInscrit(null)
+    if (!user) { setMsgInscrit({ type:'error', text:'Connectez-vous pour vous inscrire.' }); return }
+    setSending(true)
+    const { error } = await supabase.from('session_inscriptions').insert({ session_id:session.id, user_id:user.id, personnage_id:persoInscritId||null })
+    if (error) setMsgInscrit({ type:'error', text:'Erreur lors de l\'inscription.' })
+    else {
+      const { data } = await supabase.from('session_inscriptions').select('*,users(pseudo,avatar_url),personnages(nom,classe,race,avatar_url)').eq('session_id', session.id)
+      setInscriptions(data||[])
+      setDejaInscrit(true)
+      setMsgInscrit({ type:'success', text:'✅ Inscription confirmée !' })
+    }
+    setSending(false)
   }
 
+  const seDesinscrire = async () => {
+    setSending(true)
+    await supabase.from('session_inscriptions').delete().eq('session_id', session.id).eq('user_id', user.id)
+    const { data } = await supabase.from('session_inscriptions').select('*,users(pseudo,avatar_url),personnages(nom,classe,race,avatar_url)').eq('session_id', session.id)
+    setInscriptions(data||[])
+    setDejaInscrit(false)
+    setSending(false)
+  }
+
+  // Commenter
   const handleSubmit = async () => {
+    if (!user) { setMsg({ type:'error', text:'Connectez-vous pour commenter.' }); return }
     setSending(true); setMsg(null)
+    const perso = mesPersonnages.find(p => p.id === persoCommentId)
     const { error } = await supabase.from('commentaires').insert({
-      session_id: session.id,
-      pseudo: persoSelectionne?.nom || 'Aventurier',
-      note: note||null,
-      contenu: contenu.trim()||null,
-      personnage_id: persoId||null,
-      approuve: false
+      session_id:session.id, pseudo:perso?.nom||user.pseudo,
+      note:note||null, contenu:contenu.trim()||null,
+      personnage_id:persoCommentId||null, approuve:false
     })
     if (error) setMsg({ type:'error', text:'Erreur lors de l\'envoi.' })
-    else {
-      setMsg({ type:'success', text:'Merci ! Votre retour sera visible après validation par le MJ.' })
-      setPersoId(''); setMdp(''); setNote(0); setContenu(''); setEtape(1)
-    }
+    else { setMsg({ type:'success', text:'Merci ! Votre retour sera visible après validation par le MJ.' }); setNote(0); setContenu(''); setPersoCommentId('') }
     setSending(false)
   }
 
@@ -118,18 +97,13 @@ export default function SessionDetail({ session, campagne, medias, commentaires:
           <div style={{ display:'flex', gap:'0.75rem', alignItems:'center', marginBottom:'1rem', flexWrap:'wrap' }}>
             <span className={`badge ${session.statut==='future'?'badge-future':'badge-past'}`}>{session.statut==='future'?'📅 À venir':'📜 Session passée'}</span>
             {session.numero && <span style={{ color:'var(--ash)', fontFamily:'Cinzel,serif', fontSize:'0.85rem' }}>Session #{session.numero}</span>}
-            {moyenneNote && (
-              <span style={{ display:'flex', alignItems:'center', gap:'0.3rem', color:'var(--gold)', fontSize:'0.9rem' }}>
-                {'🎲'.repeat(Math.round(moyenneNote))} {moyenneNote}/5
-                <span style={{ color:'var(--ash)', fontSize:'0.75rem' }}>({approuves.filter(c=>c.note).length} vote{approuves.filter(c=>c.note).length>1?'s':''})</span>
-              </span>
-            )}
+            {moyenneNote && <span style={{ color:'var(--gold)', fontSize:'0.9rem' }}>{'🎲'.repeat(Math.round(moyenneNote))} {moyenneNote}/5</span>}
           </div>
           <h1 style={{ color:'var(--gold)', fontSize:'clamp(1.5rem,3vw,2.2rem)', lineHeight:1.2, marginBottom:'0.75rem' }}>{session.titre}</h1>
           {session.date_session && <div style={{ color:'var(--ash)', fontSize:'0.9rem', fontFamily:'Cinzel,serif' }}>📅 {new Date(session.date_session).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>}
         </div>
 
-        {/* Image de couverture */}
+        {/* Image */}
         {session.image_url && (
           <div style={{ height:320, overflow:'hidden', borderRadius:2, marginBottom:'2rem', border:'1px solid rgba(201,168,76,0.2)', position:'relative' }}>
             <img src={session.image_url} alt={session.titre} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
@@ -145,19 +119,52 @@ export default function SessionDetail({ session, campagne, medias, commentaires:
           </div>
         )}
 
-        {/* Personnages présents */}
-        {personnages.length > 0 && (
-          <div style={{ marginBottom:'2rem' }}>
-            <h2 style={{ color:'var(--gold)', fontSize:'1.1rem', marginBottom:'0.75rem' }}>Héros présents</h2>
-            <div style={{ display:'flex', flexWrap:'wrap', gap:'0.75rem' }}>
-              {personnages.map(p => (
-                <div key={p.id} style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'0.4rem 0.75rem' }}>
-                  {p.avatar_url ? <img src={p.avatar_url} alt={p.nom} style={{ width:24, height:24, borderRadius:'50%', objectFit:'cover' }} /> : <span>🧙</span>}
-                  <span style={{ color:'var(--parchment)', fontSize:'0.85rem', fontFamily:'Cinzel,serif' }}>{p.nom}</span>
-                  {p.classe && <span style={{ color:'var(--ash)', fontSize:'0.75rem' }}>({[p.race,p.classe,p.niveau?`niv.${p.niveau}`:null].filter(Boolean).join(' ')})</span>}
+        {/* INSCRIPTIONS (sessions futures) */}
+        {session.statut === 'future' && (
+          <div className="card" style={{ padding:'2rem', marginBottom:'2rem' }}>
+            <h2 style={{ color:'var(--gold)', fontSize:'1.1rem', marginBottom:'1.25rem' }}>
+              Aventuriers inscrits {inscriptions.length > 0 && <span style={{ color:'var(--ash)', fontSize:'0.85rem', fontFamily:'Crimson Text,serif' }}>({inscriptions.length})</span>}
+            </h2>
+
+            {inscriptions.length > 0 && (
+              <div style={{ display:'flex', flexWrap:'wrap', gap:'0.75rem', marginBottom:'1.5rem' }}>
+                {inscriptions.map(i => (
+                  <div key={i.id} style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'0.5rem 0.75rem' }}>
+                    <div style={{ width:32, height:32, borderRadius:'50%', overflow:'hidden', background:'rgba(201,168,76,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      {i.personnages?.avatar_url ? <img src={i.personnages.avatar_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : <span style={{ fontSize:'1rem' }}>🧙</span>}
+                    </div>
+                    <div>
+                      <div style={{ color:'var(--parchment)', fontFamily:'Cinzel,serif', fontSize:'0.8rem' }}>{i.personnages?.nom || i.users?.pseudo}</div>
+                      {i.personnages?.classe && <div style={{ color:'var(--ash)', fontSize:'0.7rem' }}>{i.personnages.classe}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!user ? (
+              <div style={{ display:'flex', alignItems:'center', gap:'1rem', flexWrap:'wrap' }}>
+                <p style={{ color:'var(--ash)', fontSize:'0.9rem' }}>Connectez-vous pour vous inscrire à cette session.</p>
+                <Link href="/compte" className="btn-primary" style={{ fontSize:'0.8rem' }}>Se connecter</Link>
+              </div>
+            ) : dejaInscrit ? (
+              <div style={{ display:'flex', alignItems:'center', gap:'1rem', flexWrap:'wrap' }}>
+                <span style={{ color:'#80d080', fontSize:'0.9rem' }}>✅ Vous êtes inscrit à cette session</span>
+                <button onClick={seDesinscrire} disabled={sending} className="btn-danger" style={{ fontSize:'0.75rem', padding:'0.35rem 0.75rem' }}>Se désinscrire</button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ marginBottom:'1rem' }}>
+                  <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.4rem' }}>Avec quel personnage ? (facultatif)</label>
+                  <select className="input-field" value={persoInscritId} onChange={e=>setPersoInscritId(e.target.value)} style={{ maxWidth:340 }}>
+                    <option value="">— Sans personnage spécifique —</option>
+                    {mesPersonnages.map(p => <option key={p.id} value={p.id}>{p.nom}{p.classe?` (${p.classe})`:''}</option>)}
+                  </select>
                 </div>
-              ))}
-            </div>
+                {msgInscrit && <div style={{ padding:'0.75rem 1rem', marginBottom:'1rem', borderRadius:2, background:msgInscrit.type==='error'?'rgba(139,0,0,0.2)':'rgba(40,120,40,0.2)', color:msgInscrit.type==='error'?'#e07070':'#80d080', fontSize:'0.9rem' }}>{msgInscrit.text}</div>}
+                <button className="btn-gold" onClick={sInscrire} disabled={sending}>⚔️ S'inscrire à cette session</button>
+              </div>
+            )}
           </div>
         )}
 
@@ -204,31 +211,22 @@ export default function SessionDetail({ session, campagne, medias, commentaires:
         {session.statut === 'passee' && (
           <div className="card" style={{ padding:'2rem' }}>
             <h2 style={{ color:'var(--gold)', fontSize:'1.1rem', marginBottom:'1.5rem' }}>Laisser un retour</h2>
-
-            {/* Étape 1 : choisir personnage */}
-            {etape === 1 && (
+            {!user ? (
+              <div style={{ display:'flex', alignItems:'center', gap:'1rem', flexWrap:'wrap' }}>
+                <p style={{ color:'var(--ash)' }}>Connectez-vous pour laisser un retour.</p>
+                <Link href="/compte" className="btn-primary">Se connecter</Link>
+              </div>
+            ) : (
               <>
-                <PersonnageSearch persoId={persoId} setPersoId={setPersoId} setMsg={setMsg} />
-                <div style={{ marginBottom:'1.25rem' }}>
-                  <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Mot de passe *</label>
-                  <input className="input-field" type="password" value={mdp} onChange={e=>setMdp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&validerPerso()} placeholder="Votre mot de passe personnage..." />
-                </div>
-                {msg && <div style={{ padding:'0.75rem 1rem', marginBottom:'1rem', borderRadius:2, background:'rgba(139,0,0,0.2)', color:'#e07070', fontSize:'0.9rem' }}>{msg.text}</div>}
-                <div style={{ display:'flex', gap:'1rem', alignItems:'center', flexWrap:'wrap' }}>
-                  <button className="btn-primary" onClick={validerPerso}>Continuer →</button>
-                  <Link href="/mon-personnage" style={{ color:'var(--gold)', fontSize:'0.85rem', fontFamily:'Cinzel,serif', opacity:0.8 }}>+ Créer mon personnage</Link>
-                </div>
-              </>
-            )}
-
-            {/* Étape 2 : note + commentaire */}
-            {etape === 2 && (
-              <>
-                <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', marginBottom:'1.5rem', background:'rgba(201,168,76,0.08)', padding:'0.75rem 1rem', borderRadius:2 }}>
-                  {persoSelectionne?.avatar_url ? <img src={persoSelectionne.avatar_url} alt="" style={{ width:36, height:36, borderRadius:'50%', objectFit:'cover' }} /> : <span style={{ fontSize:'1.5rem' }}>🧙</span>}
-                  <span style={{ color:'var(--gold)', fontFamily:'Cinzel,serif' }}>{persoSelectionne?.nom}</span>
-                  <button onClick={()=>{ setEtape(1); setMsg(null) }} style={{ marginLeft:'auto', background:'none', border:'none', color:'var(--ash)', cursor:'pointer', fontSize:'0.8rem', fontFamily:'Cinzel,serif' }}>Changer</button>
-                </div>
+                {mesPersonnages.length > 0 && (
+                  <div style={{ marginBottom:'1rem' }}>
+                    <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.4rem' }}>Avec quel personnage ? (facultatif)</label>
+                    <select className="input-field" value={persoCommentId} onChange={e=>setPersoCommentId(e.target.value)} style={{ maxWidth:340 }}>
+                      <option value="">— Commenter en tant que {user.pseudo} —</option>
+                      {mesPersonnages.map(p => <option key={p.id} value={p.id}>{p.nom}{p.classe?` (${p.classe})`:''}</option>)}
+                    </select>
+                  </div>
+                )}
                 <div style={{ marginBottom:'1rem' }}>
                   <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.4rem' }}>Note (facultatif)</label>
                   <div style={{ display:'flex', gap:'0.5rem' }}>
@@ -244,15 +242,9 @@ export default function SessionDetail({ session, campagne, medias, commentaires:
                 </div>
                 {msg && <div style={{ padding:'0.75rem 1rem', marginBottom:'1rem', borderRadius:2, background:msg.type==='error'?'rgba(139,0,0,0.2)':'rgba(40,120,40,0.2)', color:msg.type==='error'?'#e07070':'#80d080', fontSize:'0.9rem' }}>{msg.text}</div>}
                 <button className="btn-primary" onClick={handleSubmit} disabled={sending}>{sending?'Envoi...':'Envoyer mon retour'}</button>
+                <p style={{ color:'var(--ash)', fontSize:'0.8rem', marginTop:'0.75rem' }}>Votre retour sera visible après validation par le MJ.</p>
               </>
             )}
-          </div>
-        )}
-
-        {session.statut === 'future' && (
-          <div className="card" style={{ padding:'2rem', textAlign:'center' }}>
-            <div style={{ fontSize:'2rem', marginBottom:'0.75rem' }}>⏳</div>
-            <p style={{ color:'var(--ash)' }}>Les retours seront disponibles après la session.</p>
           </div>
         )}
       </div>
@@ -262,18 +254,16 @@ export default function SessionDetail({ session, campagne, medias, commentaires:
 
 export async function getServerSideProps({ params }) {
   const { id } = params
-  const [{ data: session }, { data: medias }, { data: commentaires }] = await Promise.all([
+  const [{ data: session }, { data: medias }, { data: commentaires }, { data: inscriptions }] = await Promise.all([
     supabase.from('sessions').select('*').eq('id', id).single(),
     supabase.from('medias').select('*').eq('session_id', id),
-    supabase.from('commentaires').select('*').eq('session_id', id).order('created_at',{ascending:true})
+    supabase.from('commentaires').select('*').eq('session_id', id).order('created_at',{ascending:true}),
+    supabase.from('session_inscriptions').select('*,users(pseudo,avatar_url),personnages(nom,classe,race,avatar_url)').eq('session_id', id)
   ])
-  let campagne = null, personnages = []
+  let campagne = null
   if (session?.campagne_id) {
-    const [{ data: c }, { data: p }] = await Promise.all([
-      supabase.from('campagnes').select('*').eq('id', session.campagne_id).single(),
-      supabase.from('personnages').select('*').eq('campagne_id', session.campagne_id)
-    ])
-    campagne = c; personnages = p||[]
+    const { data: c } = await supabase.from('campagnes').select('*').eq('id', session.campagne_id).single()
+    campagne = c
   }
-  return { props: { session:session||null, campagne:campagne||null, medias:medias||[], commentaires:commentaires||[], personnages } }
+  return { props: { session:session||null, campagne:campagne||null, medias:medias||[], commentaires:commentaires||[], inscriptions:inscriptions||[] } }
 }
