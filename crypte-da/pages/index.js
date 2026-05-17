@@ -39,6 +39,7 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
         .divider-gold::before,.divider-gold::after { content:''; flex:1; height:1px; background:linear-gradient(to right,transparent,#c9a84c,transparent); }
         .divider-gold span { color:#c9a84c; }
         @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+        @media(max-width:768px){.perso-grid{grid-template-columns:1fr!important}.perso-img{min-height:280px!important}}
         .fade-up { animation:fadeUp 0.8s ease forwards; }
         .fade-up-2 { animation:fadeUp 0.8s 0.2s ease both; }
         .fade-up-3 { animation:fadeUp 0.8s 0.4s ease both; }
