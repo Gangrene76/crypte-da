@@ -147,33 +147,44 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
       )}
 
       {/* PERSONNAGES */}
-      {personnages.length > 0 && (
-        <section style={{ padding:'6rem 1.5rem', maxWidth:1100, margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:'1rem' }}>
-            <p className="cinzel" style={{ fontSize:'0.75rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>LES HÉROS</p>
-            <h2 className="section-title">Nos Aventuriers</h2>
+      <section style={{ overflow:'hidden' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', minHeight:520 }} className="perso-grid">
+          <div style={{ position:'relative', minHeight:520 }} className="perso-img">
+            <div style={{ position:'absolute', inset:0, backgroundImage:'url(https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/images/armes.jpg)', backgroundSize:'cover', backgroundPosition:'center', filter:'brightness(0.75)' }} />
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, transparent 50%, #0d0b09 100%)' }} />
           </div>
-          <div className="divider-gold"><span>🧙</span></div>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:'1.25rem', justifyContent:'center' }}>
-            {personnages.slice(0,12).map(p => (
-              <div key={p.id} className="perso-card" style={{ textAlign:'center', width:130 }}>
-                <div style={{ width:80, height:80, borderRadius:'50%', background:'linear-gradient(135deg,#2a1505,#0d0b09)', border:'2px solid rgba(201,168,76,0.3)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 0.75rem', overflow:'hidden', fontSize:'2rem' }}>
-                  {p.avatar_url ? <img src={p.avatar_url} alt={p.nom} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : '🧙'}
-                </div>
-                <div className="cinzel" style={{ color:'#e8d5b0', fontSize:'0.82rem', marginBottom:'0.2rem' }}>{p.nom}</div>
-                {p.classe && <div style={{ color:'#9a9090', fontSize:'0.72rem' }}>{p.race?`${p.race} `:''}{p.classe}</div>}
+          <div style={{ background:'#0d0b09', padding:'5rem 3.5rem 5rem 2rem', display:'flex', flexDirection:'column', justifyContent:'center' }}>
+            <p className="cinzel" style={{ fontSize:'0.72rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>LES HÉROS</p>
+            <h2 className="section-title" style={{ marginBottom:'1.5rem' }}>Nos Aventuriers</h2>
+            <p style={{ color:'#9a9090', lineHeight:1.8, marginBottom:'2rem', fontSize:'1.05rem' }}>
+              Chaque aventurier laisse sa marque dans les chroniques de la Crypte. Créez votre fiche, rejoignez une campagne et entrez dans la légende.
+            </p>
+            {personnages.length > 0 && (
+              <div style={{ display:'flex', flexWrap:'wrap', gap:'0.6rem', marginBottom:'2rem' }}>
+                {personnages.slice(0,8).map(p => (
+                  <div key={p.id} style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'0.4rem 0.75rem' }}>
+                    <div style={{ width:28, height:28, borderRadius:'50%', overflow:'hidden', flexShrink:0, background:'rgba(201,168,76,0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.9rem' }}>
+                      {p.avatar_url ? <img src={p.avatar_url} alt={p.nom} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : '🧙'}
+                    </div>
+                    <div>
+                      <div className="cinzel" style={{ color:'#e8d5b0', fontSize:'0.75rem' }}>{p.nom}</div>
+                      {p.classe && <div style={{ color:'#9a9090', fontSize:'0.68rem' }}>{p.classe}</div>}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
+            <div style={{ display:'flex', gap:'1rem', flexWrap:'wrap' }}>
+              <Link href="/mon-personnage" className="btn-red">Créer mon personnage</Link>
+              <Link href="/mon-personnage" className="btn-outline" style={{ fontSize:'0.78rem' }}>Modifier ma fiche</Link>
+            </div>
           </div>
-          <div style={{ textAlign:'center', marginTop:'2.5rem' }}>
-            <Link href="/mon-personnage" className="btn-outline">Créer mon personnage</Link>
-          </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* SESSIONS RÉCENTES */}
       {sessionsPassees.length > 0 && (
-        <section style={{ padding:'4rem 1.5rem 6rem', background:'rgba(0,0,0,0.3)' }}>
+        <section style={{ padding:'4rem 1.5rem 6rem', background:'transparent' }}>
           <div style={{ maxWidth:1100, margin:'0 auto' }}>
             <div style={{ textAlign:'center', marginBottom:'1rem' }}>
               <p className="cinzel" style={{ fontSize:'0.75rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>LE LIVRE DES CHRONIQUES</p>
@@ -210,7 +221,7 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
 
       {/* AGENDA */}
       {sessionsFutures.length > 0 && (
-        <section style={{ padding:'6rem 1.5rem', maxWidth:1100, margin:'0 auto' }}>
+        <section style={{ padding:'6rem 1.5rem', background:'rgba(0,0,0,0.3)' }}><div style={{ maxWidth:1100, margin:'0 auto' }}>
           <div style={{ textAlign:'center', marginBottom:'1rem' }}>
             <p className="cinzel" style={{ fontSize:'0.75rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>À VENIR</p>
             <h2 className="section-title">Prochaines Sessions</h2>
@@ -240,7 +251,7 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
           <div style={{ textAlign:'center', marginTop:'2rem' }}>
             <Link href="/agenda" className="btn-outline">Voir tout l'agenda</Link>
           </div>
-        </section>
+        </div></section>
       )}
 
       {/* FOOTER */}
