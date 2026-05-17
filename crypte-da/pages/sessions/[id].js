@@ -3,6 +3,59 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
+
+function PersonnageSearch({ persoId, setPersoId, setMsg }) {
+  const [query, setQuery] = useState('')
+  const [resultats, setResultats] = useState([])
+  const [searching, setSearching] = useState(false)
+
+  const rechercher = async (val) => {
+    setQuery(val)
+    setPersoId('')
+    if (val.length < 2) { setResultats([]); return }
+    setSearching(true)
+    const { data } = await supabase.from('personnages').select('*').ilike('nom', `${val}%`).limit(8)
+    setResultats(data||[])
+    setSearching(false)
+  }
+
+  const persoSelectionne = resultats.find(p => p.id === persoId)
+
+  return (
+    <div style={{ marginBottom:'1rem' }}>
+      <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.5rem' }}>Votre personnage *</label>
+      <input
+        className="input-field"
+        value={persoSelectionne ? persoSelectionne.nom : query}
+        onChange={e=>rechercher(e.target.value)}
+        onFocus={e=>{ if(persoSelectionne){ setPersoId(''); setQuery(''); setResultats([]) }}}
+        placeholder="Tapez les premières lettres de votre nom..."
+        style={{ marginBottom:'0.5rem' }}
+      />
+      {searching && <div style={{ color:'var(--ash)', fontSize:'0.85rem', padding:'0.5rem' }}>Recherche...</div>}
+      {resultats.length > 0 && !persoId && (
+        <div style={{ border:'1px solid rgba(201,168,76,0.3)', borderRadius:2, overflow:'hidden' }}>
+          {resultats.map(p => (
+            <button key={p.id} onClick={()=>{ setPersoId(p.id); setQuery(p.nom); setResultats([]); setMsg(null) }}
+              style={{ display:'flex', alignItems:'center', gap:'0.75rem', padding:'0.75rem 1rem', width:'100%', background:'var(--stone-mid)', border:'none', borderBottom:'1px solid rgba(201,168,76,0.1)', cursor:'pointer', textAlign:'left', transition:'background 0.15s' }}
+              onMouseEnter={e=>e.currentTarget.style.background='rgba(201,168,76,0.1)'}
+              onMouseLeave={e=>e.currentTarget.style.background='var(--stone-mid)'}>
+              {p.avatar_url ? <img src={p.avatar_url} alt="" style={{ width:36, height:36, borderRadius:'50%', objectFit:'cover', flexShrink:0 }} /> : <span style={{ fontSize:'1.5rem', flexShrink:0 }}>🧙</span>}
+              <div>
+                <div style={{ color:'var(--gold)', fontFamily:'Cinzel,serif', fontSize:'0.9rem' }}>{p.nom}</div>
+                <div style={{ color:'var(--ash)', fontSize:'0.78rem' }}>{[p.race,p.classe,p.niveau?`Niv.${p.niveau}`:null].filter(Boolean).join(' · ')}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+      {query.length >= 2 && resultats.length === 0 && !searching && (
+        <div style={{ color:'var(--ash)', fontSize:'0.85rem', padding:'0.5rem', fontStyle:'italic' }}>Aucun personnage trouvé.</div>
+      )}
+    </div>
+  )
+}
+
 export default function SessionDetail({ session, campagne, medias, commentaires: initCommentaires, personnages }) {
   const [commentaires, setCommentaires] = useState(initCommentaires)
   const [persoId, setPersoId] = useState('')
@@ -155,38 +208,16 @@ export default function SessionDetail({ session, campagne, medias, commentaires:
             {/* Étape 1 : choisir personnage */}
             {etape === 1 && (
               <>
-                <div style={{ marginBottom:'1rem' }}>
-                  <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.5rem' }}>Votre personnage *</label>
-                  {personnages.length > 0 ? (
-                    <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem' }}>
-                      {personnages.map(p => (
-                        <button key={p.id} onClick={()=>{ setPersoId(p.id); setMsg(null) }} style={{ display:'flex', alignItems:'center', gap:'0.75rem', padding:'0.75rem 1rem', borderRadius:2, cursor:'pointer', transition:'all 0.2s', background:persoId===p.id?'rgba(201,168,76,0.15)':'rgba(255,255,255,0.02)', border:`1px solid ${persoId===p.id?'rgba(201,168,76,0.6)':'rgba(201,168,76,0.15)'}`, textAlign:'left', width:'100%' }}>
-                          {p.avatar_url ? <img src={p.avatar_url} alt="" style={{ width:36, height:36, borderRadius:'50%', objectFit:'cover', flexShrink:0 }} /> : <span style={{ fontSize:'1.5rem', flexShrink:0 }}>🧙</span>}
-                          <div>
-                            <div style={{ color:'var(--gold)', fontFamily:'Cinzel,serif', fontSize:'0.9rem' }}>{p.nom}</div>
-                            <div style={{ color:'var(--ash)', fontSize:'0.78rem' }}>{[p.race,p.classe,p.niveau?`Niv.${p.niveau}`:null].filter(Boolean).join(' · ')}</div>
-                          </div>
-                          {persoId===p.id && <span style={{ marginLeft:'auto', color:'var(--gold)' }}>✓</span>}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div style={{ color:'var(--ash)', fontSize:'0.9rem', padding:'1rem', background:'rgba(255,255,255,0.02)', borderRadius:2, border:'1px solid rgba(201,168,76,0.15)' }}>
-                      Aucun personnage dans cette campagne.
-                    </div>
-                  )}
-                  <div style={{ marginTop:'0.75rem', textAlign:'center' }}>
-                    <Link href="/mon-personnage" style={{ color:'var(--gold)', fontSize:'0.85rem', fontFamily:'Cinzel,serif', opacity:0.8 }}>
-                      + Créer mon personnage
-                    </Link>
-                  </div>
-                </div>
+                <PersonnageSearch persoId={persoId} setPersoId={setPersoId} setMsg={setMsg} />
                 <div style={{ marginBottom:'1.25rem' }}>
                   <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Mot de passe *</label>
-                  <input className="input-field" type="password" value={mdp} onChange={e=>setMdp(e.target.value)} placeholder="Votre mot de passe personnage..." />
+                  <input className="input-field" type="password" value={mdp} onChange={e=>setMdp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&validerPerso()} placeholder="Votre mot de passe personnage..." />
                 </div>
                 {msg && <div style={{ padding:'0.75rem 1rem', marginBottom:'1rem', borderRadius:2, background:'rgba(139,0,0,0.2)', color:'#e07070', fontSize:'0.9rem' }}>{msg.text}</div>}
-                <button className="btn-primary" onClick={validerPerso}>Continuer →</button>
+                <div style={{ display:'flex', gap:'1rem', alignItems:'center', flexWrap:'wrap' }}>
+                  <button className="btn-primary" onClick={validerPerso}>Continuer →</button>
+                  <Link href="/mon-personnage" style={{ color:'var(--gold)', fontSize:'0.85rem', fontFamily:'Cinzel,serif', opacity:0.8 }}>+ Créer mon personnage</Link>
+                </div>
               </>
             )}
 
