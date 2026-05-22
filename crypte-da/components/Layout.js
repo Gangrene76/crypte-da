@@ -30,6 +30,7 @@ export default function Layout({ children }) {
             <NavLink href="/">Accueil</NavLink>
             <NavLink href="/campagnes">Campagnes</NavLink>
             <NavLink href="/agenda">Agenda</NavLink>
+            <NavLink href="/personnages">Aventuriers</NavLink>
             {user ? (
               <div style={{ display:'flex', alignItems:'center', gap:'1rem' }}>
                 <Link href="/mon-compte" style={{ display:'flex', alignItems:'center', gap:'0.5rem', textDecoration:'none' }}>
@@ -55,6 +56,7 @@ export default function Layout({ children }) {
             <NavLink href="/" onClick={()=>setMenuOpen(false)}>Accueil</NavLink>
             <NavLink href="/campagnes" onClick={()=>setMenuOpen(false)}>Campagnes</NavLink>
             <NavLink href="/agenda" onClick={()=>setMenuOpen(false)}>Agenda</NavLink>
+            <NavLink href="/personnages" onClick={()=>setMenuOpen(false)}>Aventuriers</NavLink>
             {user ? (
               <>
                 <NavLink href="/mon-compte" onClick={()=>setMenuOpen(false)}>{user.pseudo}</NavLink>
