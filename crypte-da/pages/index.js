@@ -13,6 +13,15 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
+  useEffect(() => {
+    const parallax = () => {
+      const el = document.getElementById('hero-bg')
+      if (el) el.style.transform = `translateY(${window.scrollY * 0.4}px)`
+    }
+    window.addEventListener('scroll', parallax, { passive: true })
+    return () => window.removeEventListener('scroll', parallax)
+  }, [])
+
   const sessionsFutures = sessions.filter(s => s.statut === 'future').slice(0, 3)
   const sessionsPassees = sessions.filter(s => s.statut === 'passee').slice(0, 6)
 
@@ -65,12 +74,12 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
       </nav>
 
       {/* HERO */}
-      <section style={{ position:'relative', height:'75vh', minHeight:500, overflow:'hidden' }}>
-        <div style={{ position:'absolute', inset:0, backgroundImage:`url(${HERO})`, backgroundSize:'cover', backgroundPosition:'center 30%', filter:'brightness(0.55)' }} />
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(13,11,9,0.1) 0%, rgba(13,11,9,0.3) 50%, rgba(13,11,9,0.95) 100%)' }} />
-        <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'0 1.5rem' }}>
-          <div className="fade-up" style={{ marginBottom:'1.5rem' }}>
-            <img src={LOGO} alt="Logo D&A" style={{ width:140, filter:'drop-shadow(0 0 30px rgba(201,168,76,0.6))' }} />
+      <section style={{ position:'relative', overflow:'hidden' }}>
+        <div id="hero-bg" style={{ position:'absolute', top:'-15%', left:0, right:0, bottom:'-15%', backgroundImage:`url(${HERO})`, backgroundSize:'contain', backgroundPosition:'center center', backgroundRepeat:'no-repeat', filter:'brightness(0.65)', willChange:'transform', transition:'transform 0.1s linear' }} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(13,11,9,0.3) 0%, rgba(13,11,9,0.1) 40%, rgba(13,11,9,0.97) 100%)' }} />
+        <div style={{ position:'relative', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'4rem 1.5rem 6rem', minHeight:'85vh' }}>
+          <div className="fade-up" style={{ marginBottom:'2rem' }}>
+            <img src={LOGO} alt="Logo D&A" style={{ width:'clamp(200px,30vw,520px)', filter:'drop-shadow(0 0 40px rgba(201,168,76,0.7))' }} />
           </div>
           <h1 className="cinzel fade-up-2" style={{ fontSize:'clamp(2.5rem,7vw,5rem)', color:'#fff', lineHeight:1.1, marginBottom:'1rem', textShadow:'0 2px 40px rgba(0,0,0,0.8)', fontWeight:900 }}>
             La Crypte de D&A
@@ -83,7 +92,6 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
             <Link href="/agenda" className="btn-outline">Prochaines sessions</Link>
           </div>
         </div>
-
       </section>
 
       {/* AGENDA */}
