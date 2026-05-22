@@ -16,7 +16,7 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
   useEffect(() => {
     const parallax = () => {
       const el = document.getElementById('hero-bg')
-      if (el) el.style.transform = `translateY(${window.scrollY * 0.4}px)`
+      if (el) el.style.transform = `translateY(${window.scrollY * 0.3}px) scale(1.02)`
     }
     window.addEventListener('scroll', parallax, { passive: true })
     return () => window.removeEventListener('scroll', parallax)
@@ -74,9 +74,9 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
       </nav>
 
       {/* HERO */}
-      <section style={{ position:'relative', overflow:'hidden' }}>
-        <div id="hero-bg" style={{ position:'absolute', top:'-15%', left:0, right:0, bottom:'-15%', backgroundImage:`url(${HERO})`, backgroundSize:'contain', backgroundPosition:'center center', backgroundRepeat:'no-repeat', filter:'brightness(0.65)', willChange:'transform', transition:'transform 0.1s linear' }} />
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(13,11,9,0.3) 0%, rgba(13,11,9,0.1) 40%, rgba(13,11,9,0.97) 100%)' }} />
+      <section style={{ position:'relative', overflow:'hidden', background:'#0d0b09' }}>
+        <img id="hero-bg" src={HERO} alt="" style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%', objectFit:'contain', objectPosition:'center top', filter:'brightness(0.85)', willChange:'transform', display:'block' }} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(13,11,9,0.15) 0%, rgba(13,11,9,0.05) 50%, rgba(13,11,9,0.92) 100%)' }} />
         <div style={{ position:'relative', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'4rem 1.5rem 6rem', minHeight:'85vh' }}>
           <div className="fade-up" style={{ marginBottom:'2rem' }}>
             <img src={LOGO} alt="Logo D&A" style={{ width:'clamp(200px,30vw,520px)', filter:'drop-shadow(0 0 40px rgba(201,168,76,0.7))' }} />
