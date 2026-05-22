@@ -87,10 +87,7 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
           <p className="fade-up-2" style={{ fontSize:'clamp(1rem,2vw,1.25rem)', color:'rgba(232,213,176,0.85)', maxWidth:580, lineHeight:1.7, marginBottom:'2.5rem', letterSpacing:'0.02em' }}>
             Les chroniques de nos aventures. Les campagnes de David & Arthur, Maîtres du Jeu.
           </p>
-          <div className="fade-up-3" style={{ display:'flex', gap:'1rem', flexWrap:'wrap', justifyContent:'center' }}>
-            <Link href="/campagnes" className="btn-red">Voir les campagnes</Link>
-            <Link href="/agenda" className="btn-outline">Prochaines sessions</Link>
-          </div>
+
         </div>
       </section>
 

@@ -41,9 +41,7 @@ export default function Layout({ children }) {
                 <button onClick={deconnexion} style={{ background:'none', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, color:'var(--ash)', fontFamily:'Cinzel,serif', fontSize:'0.72rem', letterSpacing:'0.08em', padding:'0.3rem 0.6rem', cursor:'pointer' }}>Quitter</button>
               </div>
             ) : (
-              <Link href="/compte" style={{ fontFamily:'Cinzel,serif', fontSize:'0.78rem', letterSpacing:'0.1em', color:'var(--stone)', background:'linear-gradient(135deg,var(--gold),#a07830)', padding:'0.4rem 1rem', borderRadius:2, textDecoration:'none', textTransform:'uppercase' }}>
-                Connexion
-              </Link>
+              <NavLink href="/compte">Connexion</NavLink>
             )}
           </nav>
 
@@ -59,7 +57,7 @@ export default function Layout({ children }) {
             <NavLink href="/agenda" onClick={()=>setMenuOpen(false)}>Agenda</NavLink>
             {user ? (
               <>
-                <NavLink href="/mon-compte" onClick={()=>setMenuOpen(false)}>Mon Compte ({user.pseudo})</NavLink>
+                <NavLink href="/mon-compte" onClick={()=>setMenuOpen(false)}>{user.pseudo}</NavLink>
                 <button onClick={()=>{deconnexion();setMenuOpen(false)}} style={{ background:'none', border:'none', color:'var(--ash)', fontFamily:'Cinzel,serif', fontSize:'0.8rem', textAlign:'left', cursor:'pointer' }}>Déconnexion</button>
               </>
             ) : (
