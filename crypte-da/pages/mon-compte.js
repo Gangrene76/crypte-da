@@ -138,11 +138,13 @@ export default function MonCompte() {
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
               <Field label="Nom *" span value={form.nom} onChange={setField('nom')} placeholder="Ex: Thalindra Ombrelune" />
               <SelectField label="Jeu / Système" span value={form.jeu} onChange={setField('jeu')} />
-              <Field label="Classe" value={form.classe} onChange={setField('classe')} placeholder="Ex: Rôdeur" />
-              <Field label="Race" value={form.race} onChange={setField('race')} placeholder="Ex: Elfe" />
-              <Field label="Niveau" type="number" value={form.niveau} onChange={setField('niveau')} placeholder="1-20" />
-              <Field label="URL Avatar" value={form.avatar_url} onChange={setField('avatar_url')} placeholder="https://..." />
-              <Field label="Description" span as="textarea" value={form.description} onChange={setField('description')} placeholder="Histoire, traits, motivations..." />
+              {form.jeu !== 'Jeu de plateau' && <>
+                <Field label="Classe" value={form.classe} onChange={setField('classe')} placeholder="Ex: Rôdeur" />
+                <Field label="Race" value={form.race} onChange={setField('race')} placeholder="Ex: Elfe" />
+                <Field label="Niveau" type="number" value={form.niveau} onChange={setField('niveau')} placeholder="1-20" />
+                <Field label="URL Avatar" value={form.avatar_url} onChange={setField('avatar_url')} placeholder="https://..." />
+                <Field label="Description" span as="textarea" value={form.description} onChange={setField('description')} placeholder="Histoire, traits, motivations..." />
+              </>}
             </div>
             <div style={{ display:'flex', gap:'0.75rem', marginTop:'1.5rem' }}>
               <button className="btn-gold" onClick={sauvegarder} disabled={loading}>
