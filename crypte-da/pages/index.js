@@ -1,12 +1,18 @@
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 import { useState, useEffect } from 'react'
+import { getUser, logout } from '../lib/auth'
 
 const HERO = 'https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/images/hero.png'
 const LOGO = 'https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/images/Gemini_Generated_Image_d03jczd03jczd03j.png'
 
 export default function Home({ sessions, campagnes, mjs, personnages }) {
   const [scrolled, setScrolled] = useState(false)
+  const [user, setUser] = useState(null)
+  const router = useRouter()
+  useEffect(() => { setUser(getUser()) }, [])
+
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 60)
     window.addEventListener('scroll', fn)
@@ -58,22 +64,35 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
       `}</style>
 
       {/* NAVBAR */}
-      <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, padding:'0 2rem', height:70, display:'flex', alignItems:'center', justifyContent:'space-between', background: scrolled?'rgba(13,11,9,0.97)':'transparent', borderBottom: scrolled?'1px solid rgba(201,168,76,0.2)':'none', backdropFilter: scrolled?'blur(12px)':'none', transition:'all 0.3s' }}>
+      <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, padding:'0 2rem', height:70, display:'flex', alignItems:'center', justifyContent:'space-between', background:scrolled?'rgba(13,11,9,0.97)':'transparent', borderBottom:scrolled?'1px solid rgba(201,168,76,0.2)':'none', backdropFilter:scrolled?'blur(12px)':'none', transition:'all 0.3s' }}>
         <Link href="/" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:'0.75rem' }}>
-          <img src={LOGO} alt="D&A" style={{ width:42, height:42, objectFit:'contain', filter:'drop-shadow(0 0 8px rgba(201,168,76,0.5))' }} />
+          <img src={LOGO} alt="D&A" style={{ width:38, height:38, objectFit:'contain', filter:'drop-shadow(0 0 6px rgba(201,168,76,0.5))' }} />
           <div>
             <div className="cinzel" style={{ fontSize:'0.95rem', color:'#c9a84c', letterSpacing:'0.1em', lineHeight:1 }}>La Crypte de D&A</div>
             <div style={{ fontSize:'0.65rem', color:'#9a9090', letterSpacing:'0.18em', marginTop:2 }}>DAVID & ARTHUR</div>
           </div>
         </Link>
-        <div style={{ display:'flex', gap:'2rem', alignItems:'center' }}>
+        <div style={{ display:'flex', gap:'1.75rem', alignItems:'center' }}>
           <Link href="/campagnes" className="nav-link">Campagnes</Link>
           <Link href="/agenda" className="nav-link">Agenda</Link>
-          <Link href="/mon-personnage" className="nav-link">Mon Personnage</Link>
+          <Link href="/personnages" className="nav-link">Aventuriers</Link>
+          {user ? (
+            <div style={{ display:'flex', alignItems:'center', gap:'1rem' }}>
+              <Link href="/mon-compte" style={{ display:'flex', alignItems:'center', gap:'0.5rem', textDecoration:'none' }}>
+                <div style={{ width:32, height:32, borderRadius:'50%', background:'linear-gradient(135deg,#8B0000,#3d0000)', border:'1px solid rgba(201,168,76,0.4)', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem' }}>
+                  {user.avatar_url ? <img src={user.avatar_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : '🧙'}
+                </div>
+                <span className="cinzel" style={{ fontSize:'0.78rem', color:'#c9a84c', letterSpacing:'0.08em' }}>{user.pseudo}</span>
+              </Link>
+              <button onClick={()=>{ logout(); setUser(null) }} style={{ background:'none', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, color:'#9a9090', fontFamily:'Cinzel,serif', fontSize:'0.72rem', letterSpacing:'0.08em', padding:'0.3rem 0.6rem', cursor:'pointer' }}>Quitter</button>
+            </div>
+          ) : (
+            <Link href="/compte" className="nav-link">Connexion</Link>
+          )}
         </div>
       </nav>
 
-      {/* HERO */}
+{/* HERO */}
       <section style={{ position:'relative', overflow:'hidden', background:'#0d0b09' }}>
         <img id="hero-bg" src={HERO} alt="" style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%', objectFit:'contain', objectPosition:'center top', filter:'brightness(0.85)', willChange:'transform', display:'block' }} />
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(13,11,9,0.15) 0%, rgba(13,11,9,0.05) 50%, rgba(13,11,9,0.92) 100%)' }} />
