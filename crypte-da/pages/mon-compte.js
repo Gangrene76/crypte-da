@@ -19,6 +19,31 @@ function Field({ label, value, onChange, placeholder, type='text', span, as='inp
   )
 }
 
+const JEUX = [
+  'D&D',
+  'Jeu de plateau',
+  'Pathfinder',
+  'Warhammer',
+  'Call of Cthulhu',
+  'Starfinder',
+  'Shadowrun',
+  'Vampire: la Mascarade',
+  'Star Wars RPG',
+  'Autre',
+]
+
+function SelectField({ label, value, onChange, span }) {
+  return (
+    <div style={{ gridColumn:span?'1/-1':undefined }}>
+      <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>{label}</label>
+      <select className="input-field" value={value} onChange={e=>onChange(e.target.value)}>
+        <option value="">— Choisir un jeu —</option>
+        {JEUX.map(j => <option key={j} value={j}>{j}</option>)}
+      </select>
+    </div>
+  )
+}
+
 export default function MonCompte() {
   const router = useRouter()
   const [user, setUserState] = useState(null)
@@ -112,7 +137,7 @@ export default function MonCompte() {
             </h3>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
               <Field label="Nom *" span value={form.nom} onChange={setField('nom')} placeholder="Ex: Thalindra Ombrelune" />
-              <Field label="Jeu / Système" span value={form.jeu} onChange={setField('jeu')} placeholder="Ex: D&D 5e, Pathfinder, Warhammer..." />
+              <SelectField label="Jeu / Système" span value={form.jeu} onChange={setField('jeu')} />
               <Field label="Classe" value={form.classe} onChange={setField('classe')} placeholder="Ex: Rôdeur" />
               <Field label="Race" value={form.race} onChange={setField('race')} placeholder="Ex: Elfe" />
               <Field label="Niveau" type="number" value={form.niveau} onChange={setField('niveau')} placeholder="1-20" />
