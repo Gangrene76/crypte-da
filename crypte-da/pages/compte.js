@@ -18,7 +18,7 @@ export default function Compte() {
     setMsg(null)
     if (!pseudo.trim() || !mdp) { setMsg({ type:'error', text:'Pseudo et mot de passe requis.' }); return }
     setLoading(true)
-    const { data, error } = await supabase.from('users').select('*').eq('pseudo', pseudo.trim()).single()
+    const { data } = await supabase.from('users').select('*').eq('pseudo', pseudo.trim()).single()
     setLoading(false)
     if (!data || data.mot_de_passe !== mdp) { setMsg({ type:'error', text:'Pseudo ou mot de passe incorrect.' }); return }
     setUser({ id:data.id, pseudo:data.pseudo, avatar_url:data.avatar_url })
@@ -43,26 +43,23 @@ export default function Compte() {
 
   return (
     <Layout>
-      <div style={{ maxWidth:460, margin:'0 auto', padding:'4rem 1.5rem' }}>
-        <h1 style={{ color:'var(--gold)', fontSize:'2rem', textAlign:'center', marginBottom:'0.5rem' }}>
+      <div style={{ maxWidth:440, margin:'0 auto', padding:'3rem 1rem 4rem' }}>
+        <h1 style={{ color:'var(--gold)', fontSize:'clamp(1.4rem,4vw,2rem)', textAlign:'center', marginBottom:'0.5rem' }}>
           {mode === 'connexion' ? 'Connexion' : 'Créer un compte'}
         </h1>
         <div className="divider"><span>🔐</span></div>
-
-        {/* Tabs */}
         <div style={{ display:'flex', marginBottom:'2rem', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, overflow:'hidden' }}>
           {['connexion','inscription'].map(m => (
-            <button key={m} onClick={()=>{ setMode(m); setMsg(null) }} style={{ flex:1, padding:'0.75rem', fontFamily:'Cinzel,serif', fontSize:'0.8rem', letterSpacing:'0.1em', textTransform:'uppercase', cursor:'pointer', border:'none', background:mode===m?'rgba(201,168,76,0.15)':'transparent', color:mode===m?'var(--gold)':'var(--ash)', borderBottom:mode===m?'2px solid var(--gold)':'2px solid transparent', transition:'all 0.2s' }}>
+            <button key={m} onClick={()=>{ setMode(m); setMsg(null) }} style={{ flex:1, padding:'0.75rem', fontFamily:'Cinzel,serif', fontSize:'0.78rem', letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer', border:'none', background:mode===m?'rgba(201,168,76,0.15)':'transparent', color:mode===m?'var(--gold)':'var(--ash)', borderBottom:mode===m?'2px solid var(--gold)':'2px solid transparent', transition:'all 0.2s' }}>
               {m === 'connexion' ? 'Se connecter' : 'S\'inscrire'}
             </button>
           ))}
         </div>
-
-        <div className="card" style={{ padding:'2rem' }}>
+        <div className="card" style={{ padding:'1.5rem' }}>
           <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
             <div>
               <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Pseudo *</label>
-              <input className="input-field" value={pseudo} onChange={e=>setPseudo(e.target.value)} placeholder="Votre pseudo d'aventurier..." onKeyDown={e=>e.key==='Enter'&&(mode==='connexion'?connexion():null)} />
+              <input className="input-field" value={pseudo} onChange={e=>setPseudo(e.target.value)} placeholder="Votre pseudo..." onKeyDown={e=>e.key==='Enter'&&(mode==='connexion'?connexion():null)} />
             </div>
             <div>
               <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Mot de passe *</label>
@@ -71,7 +68,7 @@ export default function Compte() {
             {mode === 'inscription' && (
               <>
                 <div>
-                  <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Confirmer le mot de passe *</label>
+                  <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Confirmer *</label>
                   <input className="input-field" type="password" value={mdpConfirm} onChange={e=>setMdpConfirm(e.target.value)} placeholder="••••••••" />
                 </div>
                 <div>
@@ -81,13 +78,7 @@ export default function Compte() {
               </>
             )}
           </div>
-
-          {msg && (
-            <div style={{ padding:'0.75rem 1rem', margin:'1rem 0 0', borderRadius:2, background:msg.type==='error'?'rgba(139,0,0,0.2)':'rgba(40,120,40,0.2)', color:msg.type==='error'?'#e07070':'#80d080', fontSize:'0.9rem' }}>
-              {msg.text}
-            </div>
-          )}
-
+          {msg && <div style={{ padding:'0.75rem 1rem', margin:'1rem 0 0', borderRadius:2, background:msg.type==='error'?'rgba(139,0,0,0.2)':'rgba(40,120,40,0.2)', color:msg.type==='error'?'#e07070':'#80d080', fontSize:'0.9rem' }}>{msg.text}</div>}
           <button className="btn-gold" onClick={mode==='connexion'?connexion:inscription} disabled={loading} style={{ width:'100%', marginTop:'1.5rem' }}>
             {loading ? '...' : mode==='connexion' ? 'Se connecter' : 'Créer mon compte'}
           </button>

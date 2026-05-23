@@ -63,3 +63,43 @@ textarea.input-field { resize: vertical; min-height: 100px; }
 .fade-in { animation: fadeIn 0.5s ease forwards; }
 
 select.input-field option { background: var(--stone-mid); color: var(--parchment); }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  body { font-size: 16px; }
+
+  /* Grilles de formulaires → 1 colonne */
+  .grid-2col { grid-template-columns: 1fr !important; }
+
+  /* Padding réduit */
+  .pad-section { padding: 2rem 1rem !important; }
+
+  /* Boutons pleine largeur */
+  .btn-primary, .btn-gold, .btn-danger { width: 100%; text-align: center; justify-content: center; }
+
+  /* Cards sans hover transform sur mobile */
+  .card:hover { transform: none !important; }
+
+  /* Textes */
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.2rem; }
+
+  /* Admin sidebar masquée sur mobile */
+  .admin-sidebar { display: none !important; }
+  .admin-main { padding: 1.5rem 1rem !important; }
+
+  /* Inputs full width */
+  .input-field { font-size: 16px !important; } /* évite zoom iOS */
+
+  /* Flex rows → colonnes */
+  .flex-row-mobile { flex-direction: column !important; }
+
+  /* Tableaux/listes admin */
+  .admin-row-flex { flex-direction: column !important; gap: 0.5rem !important; }
+}
+
+@media (max-width: 480px) {
+  body { font-size: 15px; }
+  .card { border-radius: 2px; }
+  .badge { font-size: 0.6rem; }
+}

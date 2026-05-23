@@ -10,15 +10,15 @@ const LOGO = 'https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/
 export default function Home({ sessions, campagnes, mjs, personnages }) {
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser] = useState(null)
+  const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
-  useEffect(() => { setUser(getUser()) }, [])
 
+  useEffect(() => { setUser(getUser()) }, [])
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 60)
     window.addEventListener('scroll', fn)
     return () => window.removeEventListener('scroll', fn)
   }, [])
-
   useEffect(() => {
     const parallax = () => {
       const el = document.getElementById('hero-bg')
@@ -42,137 +42,170 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
         .nav-link { font-family:'Cinzel',serif; font-size:0.78rem; letter-spacing:0.12em; text-transform:uppercase; color:#e8d5b0; text-decoration:none; opacity:0.8; transition:all 0.2s; }
         .nav-link:hover { color:#c9a84c; opacity:1; }
         .btn-red { background:linear-gradient(135deg,#8B0000,#6b0000); color:#e8d5b0; font-family:'Cinzel',serif; font-size:0.8rem; letter-spacing:0.12em; text-transform:uppercase; padding:0.8rem 2rem; border:1px solid rgba(201,168,76,0.3); border-radius:2px; cursor:pointer; text-decoration:none; display:inline-block; transition:all 0.25s; }
-        .btn-red:hover { background:linear-gradient(135deg,#c0392b,#8B0000); border-color:#c9a84c; transform:translateY(-2px); }
         .btn-outline { background:transparent; color:#c9a84c; font-family:'Cinzel',serif; font-size:0.8rem; letter-spacing:0.12em; text-transform:uppercase; padding:0.8rem 2rem; border:1px solid #c9a84c; border-radius:2px; cursor:pointer; text-decoration:none; display:inline-block; transition:all 0.25s; }
-        .btn-outline:hover { background:rgba(201,168,76,0.1); transform:translateY(-2px); }
         .card-hover { transition:transform 0.3s, border-color 0.3s; }
         .card-hover:hover { transform:translateY(-6px); border-color:rgba(201,168,76,0.6) !important; }
-        .perso-card:hover { transform:translateY(-4px); }
-        .perso-card { transition:transform 0.25s; }
-        .section-title { font-family:'Cinzel',serif; font-size:clamp(1.6rem,3vw,2.2rem); color:#c9a84c; letter-spacing:0.06em; }
-        .divider-gold { display:flex; align-items:center; gap:1rem; margin:1rem 0 2.5rem; }
+        .section-title { font-family:'Cinzel',serif; font-size:clamp(1.4rem,3vw,2.2rem); color:#c9a84c; letter-spacing:0.06em; }
+        .divider-gold { display:flex; align-items:center; gap:1rem; margin:1rem 0 2rem; }
         .divider-gold::before,.divider-gold::after { content:''; flex:1; height:1px; background:linear-gradient(to right,transparent,#c9a84c,transparent); }
         .divider-gold span { color:#c9a84c; }
         @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
-        @media(max-width:768px){.perso-grid{grid-template-columns:1fr!important}.perso-img{min-height:280px!important}}
         .fade-up { animation:fadeUp 0.8s ease forwards; }
         .fade-up-2 { animation:fadeUp 0.8s 0.2s ease both; }
-        .fade-up-3 { animation:fadeUp 0.8s 0.4s ease both; }
         .badge { font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase; padding:0.2rem 0.6rem; border-radius:2px; }
         .badge-future { background:rgba(201,168,76,0.15); color:#c9a84c; border:1px solid rgba(201,168,76,0.4); }
         .badge-past { background:rgba(100,80,80,0.2); color:#c09090; border:1px solid rgba(139,0,0,0.3); }
+        .nav-desktop { display:flex; }
+        .nav-burger { display:none; }
+        .nav-mobile-menu { display:none; }
+        @media(max-width:768px){
+          .nav-desktop { display:none !important; }
+          .nav-burger { display:block !important; }
+          .nav-mobile-menu { display:flex !important; }
+          .perso-grid { grid-template-columns:1fr !important; }
+          .perso-img { min-height:220px !important; }
+          .camp-grid { grid-template-columns:1fr !important; }
+          .sess-grid { grid-template-columns:1fr !important; }
+          .mj-grid { grid-template-columns:1fr !important; }
+          .agenda-row { flex-direction:column; gap:0.5rem; }
+          .card-hover:hover { transform:none !important; }
+        }
       `}</style>
 
       {/* NAVBAR */}
-      <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, padding:'0 2rem', height:70, display:'flex', alignItems:'center', justifyContent:'space-between', background:scrolled?'rgba(13,11,9,0.97)':'transparent', borderBottom:scrolled?'1px solid rgba(201,168,76,0.2)':'none', backdropFilter:scrolled?'blur(12px)':'none', transition:'all 0.3s' }}>
-        <Link href="/" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:'0.75rem' }}>
-          <img src={LOGO} alt="D&A" style={{ width:38, height:38, objectFit:'contain', filter:'drop-shadow(0 0 6px rgba(201,168,76,0.5))' }} />
+      <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, padding:'0 1.5rem', height:65, display:'flex', alignItems:'center', justifyContent:'space-between', background:scrolled||menuOpen?'rgba(13,11,9,0.97)':'transparent', borderBottom:(scrolled||menuOpen)?'1px solid rgba(201,168,76,0.2)':'none', backdropFilter:(scrolled||menuOpen)?'blur(12px)':'none', transition:'all 0.3s' }}>
+        <Link href="/" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:'0.6rem' }}>
+          <img src={LOGO} alt="D&A" style={{ width:34, height:34, objectFit:'contain', filter:'drop-shadow(0 0 6px rgba(201,168,76,0.5))' }} />
           <div>
-            <div className="cinzel" style={{ fontSize:'0.95rem', color:'#c9a84c', letterSpacing:'0.1em', lineHeight:1 }}>La Crypte de D&A</div>
-            <div style={{ fontSize:'0.65rem', color:'#9a9090', letterSpacing:'0.18em', marginTop:2 }}>DAVID & ARTHUR</div>
+            <div className="cinzel" style={{ fontSize:'0.9rem', color:'#c9a84c', letterSpacing:'0.1em', lineHeight:1 }}>La Crypte de D&A</div>
+            <div style={{ fontSize:'0.6rem', color:'#9a9090', letterSpacing:'0.15em' }}>DAVID & ARTHUR</div>
           </div>
         </Link>
-        <div style={{ display:'flex', gap:'1.75rem', alignItems:'center' }}>
+
+        {/* Desktop nav */}
+        <div className="nav-desktop" style={{ gap:'1.75rem', alignItems:'center' }}>
           <Link href="/campagnes" className="nav-link">Campagnes</Link>
           <Link href="/agenda" className="nav-link">Agenda</Link>
           <Link href="/personnages" className="nav-link">Aventuriers</Link>
           {user ? (
             <div style={{ display:'flex', alignItems:'center', gap:'1rem' }}>
               <Link href="/mon-compte" style={{ display:'flex', alignItems:'center', gap:'0.5rem', textDecoration:'none' }}>
-                <div style={{ width:32, height:32, borderRadius:'50%', background:'linear-gradient(135deg,#8B0000,#3d0000)', border:'1px solid rgba(201,168,76,0.4)', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem' }}>
+                <div style={{ width:30, height:30, borderRadius:'50%', background:'linear-gradient(135deg,#8B0000,#3d0000)', border:'1px solid rgba(201,168,76,0.4)', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.9rem' }}>
                   {user.avatar_url ? <img src={user.avatar_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : '🧙'}
                 </div>
-                <span className="cinzel" style={{ fontSize:'0.78rem', color:'#c9a84c', letterSpacing:'0.08em' }}>{user.pseudo}</span>
+                <span className="cinzel" style={{ fontSize:'0.75rem', color:'#c9a84c' }}>{user.pseudo}</span>
               </Link>
-              <button onClick={()=>{ logout(); setUser(null) }} style={{ background:'none', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, color:'#9a9090', fontFamily:'Cinzel,serif', fontSize:'0.72rem', letterSpacing:'0.08em', padding:'0.3rem 0.6rem', cursor:'pointer' }}>Quitter</button>
+              <button onClick={()=>{ logout(); setUser(null) }} style={{ background:'none', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, color:'#9a9090', fontFamily:'Cinzel,serif', fontSize:'0.7rem', padding:'0.3rem 0.6rem', cursor:'pointer' }}>Quitter</button>
             </div>
           ) : (
             <Link href="/compte" className="nav-link">Connexion</Link>
           )}
         </div>
+
+        {/* Burger mobile */}
+        <button className="nav-burger" onClick={()=>setMenuOpen(!menuOpen)} style={{ background:'none', border:'none', color:'#c9a84c', fontSize:'1.4rem', cursor:'pointer', padding:'0.5rem' }}>
+          {menuOpen ? '✕' : '☰'}
+        </button>
       </nav>
 
-{/* HERO */}
+      {/* Menu mobile */}
+      {menuOpen && (
+        <div className="nav-mobile-menu" style={{ position:'fixed', top:65, left:0, right:0, zIndex:99, background:'#0d0b09', borderBottom:'1px solid rgba(201,168,76,0.2)', padding:'1.25rem 1.5rem', flexDirection:'column', gap:'1rem' }}>
+          {[['/',  'Accueil'], ['/campagnes','Campagnes'], ['/agenda','Agenda'], ['/personnages','Aventuriers']].map(([href,label]) => (
+            <Link key={href} href={href} onClick={()=>setMenuOpen(false)} style={{ fontFamily:'Cinzel,serif', fontSize:'0.85rem', letterSpacing:'0.1em', color:'#e8d5b0', textDecoration:'none', textTransform:'uppercase', padding:'0.3rem 0' }}>{label}</Link>
+          ))}
+          {user ? (
+            <>
+              <Link href="/mon-compte" onClick={()=>setMenuOpen(false)} style={{ fontFamily:'Cinzel,serif', fontSize:'0.85rem', color:'#c9a84c', textDecoration:'none', padding:'0.3rem 0' }}>🧙 {user.pseudo}</Link>
+              <button onClick={()=>{ logout(); setUser(null); setMenuOpen(false) }} style={{ background:'none', border:'none', color:'#9a9090', fontFamily:'Cinzel,serif', fontSize:'0.85rem', textAlign:'left', cursor:'pointer', padding:'0.3rem 0' }}>Déconnexion</button>
+            </>
+          ) : (
+            <Link href="/compte" onClick={()=>setMenuOpen(false)} style={{ fontFamily:'Cinzel,serif', fontSize:'0.85rem', color:'#c9a84c', textDecoration:'none', padding:'0.3rem 0' }}>Connexion</Link>
+          )}
+        </div>
+      )}
+
+      {/* HERO */}
       <section style={{ position:'relative', overflow:'hidden', background:'#0d0b09' }}>
         <img id="hero-bg" src={HERO} alt="" style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%', objectFit:'contain', objectPosition:'center top', filter:'brightness(0.85)', willChange:'transform', display:'block' }} />
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(13,11,9,0.15) 0%, rgba(13,11,9,0.05) 50%, rgba(13,11,9,0.92) 100%)' }} />
-        <div style={{ position:'relative', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'4rem 1.5rem 6rem', minHeight:'85vh' }}>
-          <div className="fade-up" style={{ marginBottom:'2rem' }}>
-            <img src={LOGO} alt="Logo D&A" style={{ width:'clamp(200px,30vw,520px)', filter:'drop-shadow(0 0 40px rgba(201,168,76,0.7))' }} />
+        <div style={{ position:'relative', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'5rem 1.5rem 5rem', minHeight:'85vh' }}>
+          <div className="fade-up" style={{ marginBottom:'1.5rem' }}>
+            <img src={LOGO} alt="Logo D&A" style={{ width:'clamp(160px,28vw,520px)', filter:'drop-shadow(0 0 40px rgba(201,168,76,0.7))' }} />
           </div>
-          <h1 className="cinzel fade-up-2" style={{ fontSize:'clamp(2.5rem,7vw,5rem)', color:'#fff', lineHeight:1.1, marginBottom:'1rem', textShadow:'0 2px 40px rgba(0,0,0,0.8)', fontWeight:900 }}>
+          <h1 className="cinzel fade-up-2" style={{ fontSize:'clamp(2rem,6vw,5rem)', color:'#fff', lineHeight:1.1, marginBottom:'1rem', textShadow:'0 2px 40px rgba(0,0,0,0.8)', fontWeight:900 }}>
             La Crypte de D&A
           </h1>
-          <p className="fade-up-2" style={{ fontSize:'clamp(1rem,2vw,1.25rem)', color:'rgba(232,213,176,0.85)', maxWidth:580, lineHeight:1.7, marginBottom:'2.5rem', letterSpacing:'0.02em' }}>
+          <p className="fade-up-2" style={{ fontSize:'clamp(0.95rem,2vw,1.25rem)', color:'rgba(232,213,176,0.85)', maxWidth:580, lineHeight:1.7, letterSpacing:'0.02em' }}>
             Les chroniques de nos aventures. Les campagnes de David & Arthur, Maîtres du Jeu.
           </p>
-
         </div>
       </section>
 
       {/* AGENDA */}
       {sessionsFutures.length > 0 && (
-        <section style={{ padding:'6rem 1.5rem', background:'rgba(0,0,0,0.3)' }}><div style={{ maxWidth:1100, margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:'1rem' }}>
-            <p className="cinzel" style={{ fontSize:'0.75rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>À VENIR</p>
-            <h2 className="section-title">Prochaines Sessions</h2>
-          </div>
-          <div className="divider-gold"><span>📅</span></div>
-          <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}>
-            {sessionsFutures.map(s => (
-              <Link key={s.id} href={`/sessions/${s.id}`} style={{ textDecoration:'none' }}>
-                <div className="card-hover" style={{ background:'#1a1714', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'1.25rem 1.5rem', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'1rem', flexWrap:'wrap' }}>
-                  <div style={{ display:'flex', gap:'1rem', alignItems:'center' }}>
-                    {s.date_session && (
-                      <div style={{ textAlign:'center', minWidth:48, background:'rgba(201,168,76,0.1)', border:'1px solid rgba(201,168,76,0.3)', borderRadius:2, padding:'0.4rem 0.6rem' }}>
-                        <div className="cinzel" style={{ fontSize:'1.2rem', color:'#c9a84c', lineHeight:1 }}>{new Date(s.date_session).getDate()}</div>
-                        <div className="cinzel" style={{ fontSize:'0.6rem', color:'#9a9090', textTransform:'uppercase' }}>{new Date(s.date_session).toLocaleDateString('fr-FR',{month:'short'})}</div>
+        <section style={{ padding:'4rem 1.5rem 5rem', background:'rgba(0,0,0,0.3)' }}>
+          <div style={{ maxWidth:1100, margin:'0 auto' }}>
+            <div style={{ textAlign:'center', marginBottom:'1rem' }}>
+              <p className="cinzel" style={{ fontSize:'0.72rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>À VENIR</p>
+              <h2 className="section-title">Prochaines Sessions</h2>
+            </div>
+            <div className="divider-gold"><span>📅</span></div>
+            <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}>
+              {sessionsFutures.map(s => (
+                <Link key={s.id} href={`/sessions/${s.id}`} style={{ textDecoration:'none' }}>
+                  <div className="card-hover" style={{ background:'#1a1714', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'1rem 1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center', gap:'1rem', flexWrap:'wrap' }}>
+                    <div style={{ display:'flex', gap:'0.75rem', alignItems:'center' }} className="agenda-row">
+                      {s.date_session && (
+                        <div style={{ textAlign:'center', minWidth:46, background:'rgba(201,168,76,0.1)', border:'1px solid rgba(201,168,76,0.3)', borderRadius:2, padding:'0.4rem 0.5rem', flexShrink:0 }}>
+                          <div className="cinzel" style={{ fontSize:'1.1rem', color:'#c9a84c', lineHeight:1 }}>{new Date(s.date_session).getDate()}</div>
+                          <div className="cinzel" style={{ fontSize:'0.6rem', color:'#9a9090', textTransform:'uppercase' }}>{new Date(s.date_session).toLocaleDateString('fr-FR',{month:'short'})}</div>
+                        </div>
+                      )}
+                      <div>
+                        <div className="cinzel" style={{ color:'#e8d5b0', fontSize:'0.9rem' }}>{s.titre}</div>
+                        {s.campagnes && <div style={{ color:'#c9a84c', fontSize:'0.75rem', opacity:0.8 }}>{s.campagnes.nom}</div>}
                       </div>
-                    )}
-                    <div>
-                      <div className="cinzel" style={{ color:'#e8d5b0', fontSize:'0.95rem' }}>{s.titre}</div>
-                      {s.campagnes && <div style={{ color:'#c9a84c', fontSize:'0.78rem', opacity:0.8 }}>{s.campagnes.nom}</div>}
                     </div>
+                    <span className="badge badge-future">📅 À venir</span>
                   </div>
-                  <span className="badge badge-future">📅 À venir</span>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
+            <div style={{ textAlign:'center', marginTop:'2rem' }}>
+              <Link href="/agenda" className="btn-outline">Voir tout l'agenda</Link>
+            </div>
           </div>
-          <div style={{ textAlign:'center', marginTop:'2rem' }}>
-            <Link href="/agenda" className="btn-outline">Voir tout l'agenda</Link>
-          </div>
-        </div></section>
+        </section>
       )}
 
       {/* SESSIONS RÉCENTES */}
       {sessionsPassees.length > 0 && (
-        <section style={{ padding:'4rem 1.5rem 6rem', background:'transparent' }}>
+        <section style={{ padding:'4rem 1.5rem 5rem' }}>
           <div style={{ maxWidth:1100, margin:'0 auto' }}>
             <div style={{ textAlign:'center', marginBottom:'1rem' }}>
-              <p className="cinzel" style={{ fontSize:'0.75rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>LE LIVRE DES CHRONIQUES</p>
+              <p className="cinzel" style={{ fontSize:'0.72rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>LE LIVRE DES CHRONIQUES</p>
               <h2 className="section-title">Dernières Sessions</h2>
             </div>
             <div className="divider-gold"><span>📜</span></div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:'1rem' }}>
+            <div className="sess-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:'1rem' }}>
               {sessionsPassees.map(s => (
                 <Link key={s.id} href={`/sessions/${s.id}`} style={{ textDecoration:'none' }}>
                   <div className="card-hover" style={{ background:'#1a1714', border:'1px solid rgba(201,168,76,0.15)', borderRadius:2, overflow:'hidden' }}>
                     {s.image_url && (
-                      <div style={{ height:160, overflow:'hidden', position:'relative' }}>
+                      <div style={{ height:150, overflow:'hidden', position:'relative' }}>
                         <img src={s.image_url} alt={s.titre} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
                         <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(26,23,20,0.8) 0%, transparent 60%)' }} />
                       </div>
                     )}
                     <div style={{ padding:'1.25rem' }}>
-                    <div style={{ display:'flex', gap:'0.5rem', marginBottom:'0.75rem', alignItems:'center' }}>
-                      <span className="badge badge-past">📜 Passée</span>
-                      {s.numero && <span style={{ color:'#9a9090', fontSize:'0.8rem' }}>#{s.numero}</span>}
-                    </div>
-                    <h3 className="cinzel" style={{ color:'#e8d5b0', fontSize:'1rem', marginBottom:'0.5rem', lineHeight:1.3 }}>{s.titre}</h3>
-                    {s.campagnes && <div style={{ color:'#c9a84c', fontSize:'0.78rem', marginBottom:'0.5rem', opacity:0.8 }}>{s.campagnes.nom}</div>}
-                    {s.date_session && <div style={{ color:'#9a9090', fontSize:'0.82rem' }}>📅 {new Date(s.date_session).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>}
-                    {s.resume && <p style={{ color:'#9a9090', fontSize:'0.88rem', marginTop:'0.75rem', lineHeight:1.5, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{s.resume}</p>}
+                      <div style={{ display:'flex', gap:'0.5rem', marginBottom:'0.6rem', alignItems:'center', flexWrap:'wrap' }}>
+                        <span className="badge badge-past">📜 Passée</span>
+                        {s.numero && <span style={{ color:'#9a9090', fontSize:'0.8rem' }}>#{s.numero}</span>}
+                      </div>
+                      <h3 className="cinzel" style={{ color:'#e8d5b0', fontSize:'0.95rem', marginBottom:'0.4rem', lineHeight:1.3 }}>{s.titre}</h3>
+                      {s.campagnes && <div style={{ color:'#c9a84c', fontSize:'0.75rem', opacity:0.8 }}>{s.campagnes.nom}</div>}
+                      {s.date_session && <div style={{ color:'#9a9090', fontSize:'0.8rem', marginTop:'0.3rem' }}>📅 {new Date(s.date_session).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>}
                     </div>
                   </div>
                 </Link>
@@ -184,28 +217,28 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
 
       {/* CAMPAGNES */}
       {campagnes.length > 0 && (
-        <section style={{ padding:'4rem 1.5rem 6rem', background:'rgba(0,0,0,0.3)' }}>
+        <section style={{ padding:'4rem 1.5rem 5rem', background:'rgba(0,0,0,0.3)' }}>
           <div style={{ maxWidth:1100, margin:'0 auto' }}>
             <div style={{ textAlign:'center', marginBottom:'1rem' }}>
-              <p className="cinzel" style={{ fontSize:'0.75rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>NOS ÉPOPÉES</p>
+              <p className="cinzel" style={{ fontSize:'0.72rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>NOS ÉPOPÉES</p>
               <h2 className="section-title">Les Campagnes</h2>
             </div>
             <div className="divider-gold"><span>⚔️</span></div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:'1.5rem' }}>
+            <div className="camp-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:'1.5rem' }}>
               {campagnes.map(c => (
                 <Link key={c.id} href={`/campagnes/${c.id}`} style={{ textDecoration:'none' }}>
                   <div className="card-hover" style={{ background:'#1a1714', border:'1px solid rgba(201,168,76,0.15)', borderRadius:2, overflow:'hidden' }}>
-                    <div style={{ height:200, background:c.image_url?`url(${c.image_url}) center/cover`:'linear-gradient(135deg,#2a1505,#0d0b09)', position:'relative' }}>
-                      {!c.image_url && <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'4rem', opacity:0.3 }}>⚔️</div>}
+                    <div style={{ height:180, background:c.image_url?`url(${c.image_url}) center/cover`:'linear-gradient(135deg,#2a1505,#0d0b09)', position:'relative' }}>
+                      {!c.image_url && <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'3rem', opacity:0.3 }}>⚔️</div>}
                       <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(26,23,20,0.9) 0%, transparent 60%)' }} />
                       <div style={{ position:'absolute', bottom:'1rem', left:'1rem' }}>
-                        <span className={`badge ${c.statut==='active'?'badge-future':'badge-past'}`}>{c.statut==='active'?'Active':'Terminée'}</span>
+                        <span style={{ fontFamily:'Cinzel,serif', fontSize:'0.62rem', letterSpacing:'0.1em', textTransform:'uppercase', padding:'0.2rem 0.6rem', borderRadius:2, background:c.statut==='active'?'rgba(40,120,40,0.2)':'rgba(80,80,80,0.3)', color:c.statut==='active'?'#80d080':'#9a9090', border:`1px solid ${c.statut==='active'?'rgba(40,120,40,0.4)':'rgba(100,100,100,0.3)'}` }}>{c.statut==='active'?'Active':'Terminée'}</span>
                       </div>
                     </div>
-                    <div style={{ padding:'1.25rem 1.5rem' }}>
-                      <h3 className="cinzel" style={{ color:'#c9a84c', fontSize:'1.05rem', marginBottom:'0.5rem' }}>{c.nom}</h3>
-                      {c.univers && <div style={{ color:'#9a9090', fontSize:'0.8rem', marginBottom:'0.5rem', fontFamily:'Cinzel,serif' }}>🌍 {c.univers}</div>}
-                      {c.description && <p style={{ color:'#9a9090', fontSize:'0.9rem', lineHeight:1.6, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{c.description}</p>}
+                    <div style={{ padding:'1.25rem' }}>
+                      <h3 className="cinzel" style={{ color:'#c9a84c', fontSize:'1rem', marginBottom:'0.4rem' }}>{c.nom}</h3>
+                      {c.univers && <div style={{ color:'#9a9090', fontSize:'0.78rem', marginBottom:'0.4rem' }}>🌍 {c.univers}</div>}
+                      {c.description && <p style={{ color:'#9a9090', fontSize:'0.88rem', lineHeight:1.5, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{c.description}</p>}
                     </div>
                   </div>
                 </Link>
@@ -220,64 +253,63 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
 
       {/* PERSONNAGES */}
       <section style={{ overflow:'hidden' }}>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', minHeight:520 }} className="perso-grid">
-          <div style={{ position:'relative', minHeight:520 }} className="perso-img">
+        <div className="perso-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', minHeight:480 }}>
+          <div className="perso-img" style={{ position:'relative', minHeight:480 }}>
             <div style={{ position:'absolute', inset:0, backgroundImage:'url(https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/images/armes.jpg)', backgroundSize:'cover', backgroundPosition:'center', filter:'brightness(0.75)' }} />
             <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, transparent 50%, #0d0b09 100%)' }} />
           </div>
-          <div style={{ background:'#0d0b09', padding:'5rem 3.5rem 5rem 2rem', display:'flex', flexDirection:'column', justifyContent:'center' }}>
+          <div style={{ background:'#0d0b09', padding:'4rem 2.5rem 4rem 1.5rem', display:'flex', flexDirection:'column', justifyContent:'center' }}>
             <p className="cinzel" style={{ fontSize:'0.72rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>LES HÉROS</p>
-            <h2 className="section-title" style={{ marginBottom:'1.5rem' }}>Nos Aventuriers</h2>
-            <p style={{ color:'#9a9090', lineHeight:1.8, marginBottom:'2rem', fontSize:'1.05rem' }}>
+            <h2 className="section-title" style={{ marginBottom:'1.25rem' }}>Nos Aventuriers</h2>
+            <p style={{ color:'#9a9090', lineHeight:1.8, marginBottom:'1.75rem', fontSize:'1rem' }}>
               Chaque aventurier laisse sa marque dans les chroniques de la Crypte. Créez votre fiche, rejoignez une campagne et entrez dans la légende.
             </p>
             {personnages.length > 0 && (
-              <div style={{ display:'flex', flexWrap:'wrap', gap:'0.6rem', marginBottom:'2rem' }}>
-                {personnages.slice(0,8).map(p => (
-                  <div key={p.id} style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'0.4rem 0.75rem' }}>
-                    <div style={{ width:28, height:28, borderRadius:'50%', overflow:'hidden', flexShrink:0, background:'rgba(201,168,76,0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.9rem' }}>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem', marginBottom:'1.75rem' }}>
+                {personnages.slice(0,6).map(p => (
+                  <div key={p.id} style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'0.35rem 0.6rem' }}>
+                    <div style={{ width:26, height:26, borderRadius:'50%', overflow:'hidden', flexShrink:0, background:'rgba(201,168,76,0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.85rem' }}>
                       {p.avatar_url ? <img src={p.avatar_url} alt={p.nom} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : '🧙'}
                     </div>
-                    <div>
-                      <div className="cinzel" style={{ color:'#e8d5b0', fontSize:'0.75rem' }}>{p.nom}</div>
-                      {p.classe && <div style={{ color:'#9a9090', fontSize:'0.68rem' }}>{p.classe}</div>}
-                    </div>
+                    <div className="cinzel" style={{ color:'#e8d5b0', fontSize:'0.72rem' }}>{p.nom}</div>
                   </div>
                 ))}
               </div>
             )}
-            <div style={{ display:'flex', gap:'1rem', flexWrap:'wrap' }}>
-              <Link href="/mon-personnage" className="btn-red">Créer mon personnage</Link>
-              <Link href="/mon-personnage" className="btn-outline" style={{ fontSize:'0.78rem' }}>Modifier ma fiche</Link>
+            <div style={{ display:'flex', gap:'0.75rem', flexWrap:'wrap' }}>
+              <Link href="/mon-compte" className="btn-red" style={{ fontSize:'0.78rem', padding:'0.7rem 1.5rem' }}>Créer mon personnage</Link>
+              <Link href="/personnages" className="btn-outline" style={{ fontSize:'0.75rem', padding:'0.7rem 1.25rem' }}>Voir tous</Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* MJs */}
-      <section style={{ padding:'6rem 1.5rem', maxWidth:1100, margin:'0 auto' }}>
-        <div style={{ textAlign:'center', marginBottom:'1rem' }}>
-          <p className="cinzel" style={{ fontSize:'0.75rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>LES MAÎTRES DU JEU</p>
-          <h2 className="section-title">David & Arthur</h2>
-        </div>
-        <div className="divider-gold"><span>✦</span></div>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))', gap:'1.5rem' }}>
-          {mjs.map(mj => (
-            <div key={mj.id} style={{ background:'rgba(26,23,20,0.8)', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'2.5rem', textAlign:'center', backdropFilter:'blur(8px)' }}>
-              <div style={{ width:90, height:90, borderRadius:'50%', background:'linear-gradient(135deg,#8B0000,#3d0000)', border:'2px solid rgba(201,168,76,0.4)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1.25rem', fontSize:'2.5rem', overflow:'hidden' }}>
-                {mj.avatar_url ? <img src={mj.avatar_url} alt={mj.prenom} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : '🎭'}
+      <section style={{ padding:'5rem 1.5rem', background:'rgba(0,0,0,0.3)' }}>
+        <div style={{ maxWidth:1000, margin:'0 auto' }}>
+          <div style={{ textAlign:'center', marginBottom:'1rem' }}>
+            <p className="cinzel" style={{ fontSize:'0.72rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>LES MAÎTRES DU JEU</p>
+            <h2 className="section-title">David & Arthur</h2>
+          </div>
+          <div className="divider-gold"><span>✦</span></div>
+          <div className="mj-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))', gap:'1.5rem', marginTop:'1rem' }}>
+            {mjs.map(mj => (
+              <div key={mj.id} style={{ background:'rgba(26,23,20,0.8)', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'2rem', textAlign:'center' }}>
+                <div style={{ width:80, height:80, borderRadius:'50%', background:'linear-gradient(135deg,#8B0000,#3d0000)', border:'2px solid rgba(201,168,76,0.4)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1rem', fontSize:'2.2rem', overflow:'hidden' }}>
+                  {mj.avatar_url ? <img src={mj.avatar_url} alt={mj.prenom} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : '🎭'}
+                </div>
+                <h3 className="cinzel" style={{ color:'#c9a84c', fontSize:'1.2rem', marginBottom:'0.6rem' }}>{mj.prenom}</h3>
+                <p style={{ color:'#9a9090', lineHeight:1.7, fontSize:'0.95rem' }}>{mj.bio || 'Maître du Jeu'}</p>
               </div>
-              <h3 className="cinzel" style={{ color:'#c9a84c', fontSize:'1.3rem', marginBottom:'0.75rem' }}>{mj.prenom}</h3>
-              <p style={{ color:'#9a9090', lineHeight:1.7 }}>{mj.bio || 'Maître du Jeu'}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer style={{ borderTop:'1px solid rgba(201,168,76,0.15)', padding:'3rem 1.5rem', textAlign:'center', background:'linear-gradient(0deg,#0a0805,transparent)' }}>
-        <img src={LOGO} alt="logo" style={{ width:60, opacity:0.7, marginBottom:'1rem' }} />
-        <div className="cinzel" style={{ fontSize:'0.75rem', color:'#9a9090', letterSpacing:'0.2em', marginBottom:'0.5rem' }}>✦ LA CRYPTE DE D&A ✦</div>
+      <footer style={{ borderTop:'1px solid rgba(201,168,76,0.15)', padding:'2.5rem 1.5rem', textAlign:'center', background:'linear-gradient(0deg,#0a0805,transparent)' }}>
+        <img src={LOGO} alt="logo" style={{ width:50, opacity:0.7, marginBottom:'0.75rem' }} />
+        <div className="cinzel" style={{ fontSize:'0.7rem', color:'#9a9090', letterSpacing:'0.2em', marginBottom:'0.4rem' }}>✦ LA CRYPTE DE D&A ✦</div>
         <div style={{ fontSize:'0.85rem', color:'#9a9090', opacity:0.5 }}>David & Arthur — Maîtres du Jeu</div>
       </footer>
     </div>
@@ -289,7 +321,7 @@ export async function getServerSideProps() {
     supabase.from('mj').select('*'),
     supabase.from('campagnes').select('*').order('created_at',{ascending:false}),
     supabase.from('sessions').select('*,campagnes(nom)').order('date_session',{ascending:false}),
-    supabase.from('personnages').select('*').limit(12)
+    supabase.from('personnages').select('*').limit(8)
   ])
   return { props: { mjs:mjs||[], campagnes:campagnes||[], sessions:sessions||[], personnages:personnages||[] } }
 }
