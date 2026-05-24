@@ -2,7 +2,17 @@ import AdminLayout from '../../components/AdminLayout'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 
-const EMPTY = { nom:'', classe:'', race:'', niveau:'', joueur_nom:'', avatar_url:'', description:'', campagne_id:'', mot_de_passe:'' }
+const JEUX = ['D&D','Jeu de plateau','Pathfinder','Warhammer','Call of Cthulhu','Starfinder','Shadowrun','Vampire: la Mascarade','Star Wars RPG','Autre']
+const EMPTY = { nom:'', classe:'', race:'', niveau:'', jeu:'', avatar_url:'', description:'', campagne_id:'' }
+
+function Field({ label, value, onChange, placeholder, type='text', span }) {
+  return (
+    <div style={{ gridColumn:span?'1/-1':undefined }}>
+      <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>{label}</label>
+      <input className="input-field" type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder||''} />
+    </div>
+  )
+}
 
 export default function AdminPersonnages() {
   const [personnages, setPersonnages] = useState([])
@@ -14,11 +24,13 @@ export default function AdminPersonnages() {
   useEffect(() => { load() }, [])
   const load = async () => {
     const [{ data: p }, { data: c }] = await Promise.all([
-      supabase.from('personnages').select('*,campagnes(nom)'),
+      supabase.from('personnages').select('*,campagnes(nom),users(pseudo)').order('nom'),
       supabase.from('campagnes').select('*')
     ])
     setPersonnages(p||[]); setCampagnes(c||[])
   }
+
+  const setField = (key) => (val) => setForm(f => ({ ...f, [key]: val }))
 
   const save = async () => {
     setMsg(null)
@@ -28,9 +40,7 @@ export default function AdminPersonnages() {
       const { error } = await supabase.from('personnages').insert(data)
       if (error) setMsg({ type:'error', text:error.message }); else { setMsg({ type:'success', text:'Personnage créé !' }); setEditing(null); load() }
     } else {
-      const updates = { ...data }
-      if (!form.mot_de_passe) delete updates.mot_de_passe
-      const { error } = await supabase.from('personnages').update(updates).eq('id', editing)
+      const { error } = await supabase.from('personnages').update(data).eq('id', editing)
       if (error) setMsg({ type:'error', text:error.message }); else { setMsg({ type:'success', text:'Enregistré !' }); setEditing(null); load() }
     }
   }
@@ -38,16 +48,9 @@ export default function AdminPersonnages() {
   const del = async (id) => { if (!confirm('Supprimer ce personnage ?')) return; await supabase.from('personnages').delete().eq('id',id); load() }
   const startEdit = (p) => {
     setEditing(p.id)
-    setForm({ nom:p.nom||'', classe:p.classe||'', race:p.race||'', niveau:p.niveau||'', joueur_nom:p.joueur_nom||'', avatar_url:p.avatar_url||'', description:p.description||'', campagne_id:p.campagne_id||'', mot_de_passe:'' })
+    setForm({ nom:p.nom||'', classe:p.classe||'', race:p.race||'', niveau:p.niveau||'', jeu:p.jeu||'', avatar_url:p.avatar_url||'', description:p.description||'', campagne_id:p.campagne_id||'' })
     setMsg(null); window.scrollTo(0,0)
   }
-
-  const F = ({ label, value, onChange, placeholder, type='text', span }) => (
-    <div style={{ gridColumn: span?'1/-1':undefined }}>
-      <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>{label}</label>
-      <input className="input-field" type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder||''} />
-    </div>
-  )
 
   return (
     <AdminLayout title="Personnages">
@@ -62,29 +65,30 @@ export default function AdminPersonnages() {
         <div className="card" style={{ padding:'2rem', marginBottom:'2rem' }}>
           <h3 style={{ color:'var(--gold)', marginBottom:'1.5rem', fontSize:'1rem' }}>{editing==='new'?'Nouveau personnage':'Modifier le personnage'}</h3>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
-            <F label="Nom du personnage *" span value={form.nom} onChange={v=>setForm({...form,nom:v})} placeholder="Ex: Thalindra Ombrelune" />
-            <F label="Classe" value={form.classe} onChange={v=>setForm({...form,classe:v})} placeholder="Ex: Rôdeur" />
-            <F label="Race" value={form.race} onChange={v=>setForm({...form,race:v})} placeholder="Ex: Elfe" />
-            <F label="Niveau" type="number" value={form.niveau} onChange={v=>setForm({...form,niveau:v})} placeholder="1-20" />
-            <F label="Joué par" value={form.joueur_nom} onChange={v=>setForm({...form,joueur_nom:v})} placeholder="Prénom du joueur" />
+            <Field label="Nom *" span value={form.nom} onChange={setField('nom')} placeholder="Ex: Thalindra Ombrelune" />
+            <div style={{ gridColumn:'1/-1' }}>
+              <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Jeu / Système</label>
+              <select className="input-field" value={form.jeu} onChange={e=>setField('jeu')(e.target.value)}>
+                <option value="">— Choisir —</option>
+                {JEUX.map(j => <option key={j} value={j}>{j}</option>)}
+              </select>
+            </div>
+            {form.jeu !== 'Jeu de plateau' && <>
+              <Field label="Classe" value={form.classe} onChange={setField('classe')} placeholder="Ex: Rôdeur" />
+              <Field label="Race" value={form.race} onChange={setField('race')} placeholder="Ex: Elfe" />
+              <Field label="Niveau" type="number" value={form.niveau} onChange={setField('niveau')} placeholder="1-20" />
+            </>}
             <div>
               <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Campagne</label>
-              <select className="input-field" value={form.campagne_id} onChange={e=>setForm({...form,campagne_id:e.target.value})}>
+              <select className="input-field" value={form.campagne_id} onChange={e=>setField('campagne_id')(e.target.value)}>
                 <option value="">— Choisir —</option>
                 {campagnes.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
               </select>
             </div>
-            <F label="URL Avatar" span value={form.avatar_url} onChange={v=>setForm({...form,avatar_url:v})} placeholder="https://..." />
+            <Field label="URL Avatar" value={form.avatar_url} onChange={setField('avatar_url')} placeholder="https://..." />
             <div style={{ gridColumn:'1/-1' }}>
               <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>Description</label>
-              <textarea className="input-field" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Histoire, traits, motivations..." />
-            </div>
-            <div style={{ gridColumn:'1/-1', borderTop:'1px solid rgba(201,168,76,0.15)', paddingTop:'1rem', marginTop:'0.5rem' }}>
-              <label style={{ display:'block', color:'var(--ash)', fontSize:'0.78rem', fontFamily:'Cinzel,serif', marginBottom:'0.3rem' }}>
-                {editing==='new'?'Mot de passe':'Nouveau mot de passe (laisser vide = inchangé)'}
-              </label>
-              <input className="input-field" type="password" value={form.mot_de_passe} onChange={e=>setForm({...form,mot_de_passe:e.target.value})} placeholder="Mot de passe du joueur..." />
-              <p style={{ color:'var(--ash)', fontSize:'0.78rem', marginTop:'0.4rem' }}>Le joueur utilisera ce mot de passe pour commenter et modifier sa fiche.</p>
+              <textarea className="input-field" value={form.description} onChange={e=>setField('description')(e.target.value)} placeholder="Histoire, traits, motivations..." />
             </div>
           </div>
           <div style={{ display:'flex', gap:'0.75rem', marginTop:'1.5rem' }}>
@@ -94,7 +98,7 @@ export default function AdminPersonnages() {
         </div>
       )}
 
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:'1rem' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:'1rem' }}>
         {personnages.length === 0 && !editing && <div className="card" style={{ padding:'2rem', textAlign:'center', color:'var(--ash)', gridColumn:'1/-1' }}>Aucun personnage enregistré.</div>}
         {personnages.map(p => (
           <div key={p.id} className="card" style={{ padding:'1.25rem' }}>
@@ -104,10 +108,10 @@ export default function AdminPersonnages() {
               </div>
               <div style={{ flex:1 }}>
                 <div style={{ color:'var(--gold)', fontFamily:'Cinzel,serif', fontSize:'0.9rem' }}>{p.nom}</div>
-                <div style={{ color:'var(--ash)', fontSize:'0.8rem', marginTop:'0.2rem' }}>{[p.race, p.classe, p.niveau?`Niv.${p.niveau}`:null].filter(Boolean).join(' · ')}</div>
-                {p.joueur_nom && <div style={{ color:'var(--parchment)', fontSize:'0.78rem', opacity:0.7 }}>par {p.joueur_nom}</div>}
-                {p.campagnes && <div style={{ color:'var(--ash)', fontSize:'0.75rem', marginTop:'0.2rem' }}>📜 {p.campagnes.nom}</div>}
-                <div style={{ color:'var(--ash)', fontSize:'0.72rem', marginTop:'0.2rem' }}>🔐 {p.mot_de_passe ? 'Mot de passe défini' : 'Pas de mot de passe'}</div>
+                {p.jeu && <div style={{ color:'var(--gold)', fontSize:'0.72rem', opacity:0.7 }}>🎲 {p.jeu}</div>}
+                <div style={{ color:'var(--ash)', fontSize:'0.8rem', marginTop:'0.15rem' }}>{[p.race, p.classe, p.niveau?`Niv.${p.niveau}`:null].filter(Boolean).join(' · ')}</div>
+                {p.users && <div style={{ color:'var(--ash)', fontSize:'0.72rem', marginTop:'0.15rem' }}>👤 {p.users.pseudo}</div>}
+                {p.campagnes && <div style={{ color:'var(--ash)', fontSize:'0.72rem', marginTop:'0.15rem' }}>📜 {p.campagnes.nom}</div>}
               </div>
             </div>
             <div style={{ display:'flex', gap:'0.5rem' }}>
