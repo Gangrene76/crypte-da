@@ -25,6 +25,7 @@ export default function Layout({ children }) {
             <NavLink href="/campagnes">Campagnes</NavLink>
             <NavLink href="/agenda">Agenda</NavLink>
             <NavLink href="/personnages">Aventuriers</NavLink>
+            <NavLink href="/news">News</NavLink>
             {user ? (
               <div style={{ display:'flex', alignItems:'center', gap:'0.75rem' }}>
                 <Link href="/mon-compte" style={{ display:'flex', alignItems:'center', gap:'0.5rem', textDecoration:'none' }}>
@@ -43,7 +44,7 @@ export default function Layout({ children }) {
         </div>
         {menuOpen && (
           <div style={{ background:'#0d0b09', borderTop:'1px solid rgba(201,168,76,0.2)', padding:'1rem 1.25rem', display:'flex', flexDirection:'column', gap:'0.875rem' }}>
-            {[['/campagnes','Campagnes'],['/agenda','Agenda'],['/personnages','Aventuriers']].map(([href,label])=>(
+            {[['/campagnes','Campagnes'],['/agenda','Agenda'],['/personnages','Aventuriers'],['/news','News']].map(([href,label])=>(
               <Link key={href} href={href} onClick={()=>setMenuOpen(false)} style={{ fontFamily:'Cinzel,serif', fontSize:'0.85rem', letterSpacing:'0.1em', color:'var(--parchment)', textDecoration:'none', textTransform:'uppercase' }}>{label}</Link>
             ))}
             {user ? (
