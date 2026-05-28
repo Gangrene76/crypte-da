@@ -87,6 +87,7 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
           <Link href="/campagnes" className="nav-link">Campagnes</Link>
           <Link href="/agenda" className="nav-link">Agenda</Link>
           <Link href="/personnages" className="nav-link">Aventuriers</Link>
+          <Link href="/news" className="nav-link">News</Link>
           {user ? (
             <div style={{ display:'flex', alignItems:'center', gap:'1rem' }}>
               <Link href="/mon-compte" style={{ display:'flex', alignItems:'center', gap:'0.5rem', textDecoration:'none' }}>
@@ -111,7 +112,7 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
       {/* Menu mobile */}
       {menuOpen && (
         <div className="nav-mobile-menu" style={{ position:'fixed', top:65, left:0, right:0, zIndex:99, background:'#0d0b09', borderBottom:'1px solid rgba(201,168,76,0.2)', padding:'1.25rem 1.5rem', flexDirection:'column', gap:'1rem' }}>
-          {[['/',  'Accueil'], ['/campagnes','Campagnes'], ['/agenda','Agenda'], ['/personnages','Aventuriers']].map(([href,label]) => (
+          {[['/',  'Accueil'], ['/campagnes','Campagnes'], ['/agenda','Agenda'], ['/personnages','Aventuriers'], ['/news','News']].map(([href,label]) => (
             <Link key={href} href={href} onClick={()=>setMenuOpen(false)} style={{ fontFamily:'Cinzel,serif', fontSize:'0.85rem', letterSpacing:'0.1em', color:'#e8d5b0', textDecoration:'none', textTransform:'uppercase', padding:'0.3rem 0' }}>{label}</Link>
           ))}
           {user ? (

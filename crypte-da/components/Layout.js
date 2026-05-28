@@ -21,7 +21,7 @@ export default function Layout({ children }) {
               <div style={{ fontFamily:'Crimson Text,serif', fontSize:'0.65rem', color:'var(--ash)', letterSpacing:'0.15em' }}>DAVID & ARTHUR</div>
             </div>
           </Link>
-          <nav style={{ display:'flex', gap:'1.5rem', alignItems:'center' }} className="hidden-mobile">
+          <nav style={{ display:'flex', gap:'1.1rem', alignItems:'center' }} className="hidden-mobile">
             <NavLink href="/campagnes">Campagnes</NavLink>
             <NavLink href="/agenda">Agenda</NavLink>
             <NavLink href="/personnages">Aventuriers</NavLink>
