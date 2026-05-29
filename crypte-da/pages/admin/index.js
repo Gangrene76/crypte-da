@@ -18,13 +18,14 @@ export default function Admin() {
   }
 
   const loadStats = async () => {
-    const [{ count: nbC }, { count: nbS }, { count: nbP }, { count: nbCom }] = await Promise.all([
+    const [{ count: nbC }, { count: nbS }, { count: nbP }, { count: nbCom }, { count: nbNews }] = await Promise.all([
       supabase.from('campagnes').select('*',{count:'exact',head:true}),
       supabase.from('sessions').select('*',{count:'exact',head:true}),
       supabase.from('personnages').select('*',{count:'exact',head:true}),
-      supabase.from('commentaires').select('*',{count:'exact',head:true}).eq('approuve',false)
+      supabase.from('commentaires').select('*',{count:'exact',head:true}).eq('approuve',false),
+      supabase.from('news').select('*',{count:'exact',head:true})
     ])
-    setStats({ campagnes:nbC, sessions:nbS, personnages:nbP, commentairesEnAttente:nbCom })
+    setStats({ campagnes:nbC, sessions:nbS, personnages:nbP, commentairesEnAttente:nbCom, news:nbNews })
   }
 
   if (!auth) return (
@@ -53,15 +54,14 @@ export default function Admin() {
           <button onClick={()=>{sessionStorage.removeItem('crypte_admin');setAuth(false)}} className="btn-danger" style={{ fontSize:'0.7rem', padding:'0.3rem 0.75rem' }}>Déconnexion</button>
         </div>
       </header>
-
       <div style={{ maxWidth:1100, margin:'0 auto', padding:'2.5rem 1.5rem' }}>
         <h1 style={{ color:'var(--gold)', fontSize:'1.6rem', marginBottom:'2rem' }}>Tableau de bord</h1>
-
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:'1rem', marginBottom:'2.5rem' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:'1rem', marginBottom:'2.5rem' }}>
           {[
             { label:'Campagnes', value:stats.campagnes??'…', icon:'⚔️' },
             { label:'Sessions', value:stats.sessions??'…', icon:'📜' },
             { label:'Personnages', value:stats.personnages??'…', icon:'🧙' },
+            { label:'Articles News', value:stats.news??'…', icon:'📰' },
             { label:'Commentaires en attente', value:stats.commentairesEnAttente??'…', icon:'💬', alert:stats.commentairesEnAttente>0 },
           ].map(s => (
             <div key={s.label} className="card" style={{ padding:'1.5rem', textAlign:'center', borderColor:s.alert?'rgba(201,168,76,0.5)':'rgba(201,168,76,0.2)' }}>
@@ -71,14 +71,14 @@ export default function Admin() {
             </div>
           ))}
         </div>
-
         <h2 style={{ color:'var(--gold)', fontSize:'1.1rem', marginBottom:'1.25rem' }}>Gestion du contenu</h2>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))', gap:'1rem' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:'1rem' }}>
           {[
             { href:'/admin/mj', icon:'🎭', label:'Maîtres du Jeu', desc:'Modifier les profils MJ' },
             { href:'/admin/campagnes', icon:'⚔️', label:'Campagnes', desc:'Créer et gérer les campagnes' },
             { href:'/admin/sessions', icon:'📜', label:'Sessions', desc:'Ajouter des sessions, médias' },
             { href:'/admin/personnages', icon:'🧙', label:'Personnages', desc:'Gérer les fiches personnages' },
+            { href:'/admin/news', icon:'📰', label:'News', desc:'Publier des articles et annonces' },
             { href:'/admin/commentaires', icon:'💬', label:'Commentaires', desc:'Modérer les retours', alert:stats.commentairesEnAttente>0, badge:stats.commentairesEnAttente },
           ].map(item => (
             <Link key={item.href} href={item.href} style={{ textDecoration:'none' }}>
