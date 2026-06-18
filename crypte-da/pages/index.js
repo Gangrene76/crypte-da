@@ -7,7 +7,7 @@ import { getUser, logout } from '../lib/auth'
 const HERO = 'https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/images/hero.png'
 const LOGO = 'https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/images/Gemini_Generated_Image_d03jczd03jczd03j.png'
 
-export default function Home({ sessions, campagnes, mjs, personnages }) {
+export default function Home({ sessions, mjs, newsArticles }) {
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -143,7 +143,46 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
         </div>
       </section>
 
-      {/* AGENDA */}
+            {/* NEWS */}
+      {newsArticles.length > 0 && (
+        <section style={{ padding:'4rem 1.5rem 5rem', background:'rgba(0,0,0,0.3)' }}>
+          <div style={{ maxWidth:1100, margin:'0 auto' }}>
+            <div style={{ textAlign:'center', marginBottom:'1rem' }}>
+              <p className="cinzel" style={{ fontSize:'0.72rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>ACTUALITÉS</p>
+              <h2 className="section-title">Dernières Nouvelles</h2>
+            </div>
+            <div className="divider-gold"><span>📰</span></div>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,300px),1fr))', gap:'1.25rem' }}>
+              {newsArticles.map(a => (
+                <a key={a.id} href={`/news/${a.id}`} style={{ textDecoration:'none' }}>
+                  <div className="card-hover" style={{ background:'#1a1714', border:'1px solid rgba(201,168,76,0.15)', borderRadius:2, overflow:'hidden' }}>
+                    {a.image_url && (
+                      <div style={{ height:160, overflow:'hidden', position:'relative' }}>
+                        <img src={a.image_url} alt={a.titre} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(26,23,20,0.8) 0%,transparent 60%)' }} />
+                      </div>
+                    )}
+                    <div style={{ padding:'1.25rem' }}>
+                      <h3 className="cinzel" style={{ color:'#c9a84c', fontSize:'0.95rem', marginBottom:'0.4rem', lineHeight:1.3 }}>{a.titre}</h3>
+                      <div style={{ color:'#9a9090', fontSize:'0.78rem', marginBottom:'0.5rem', display:'flex', gap:'0.75rem', flexWrap:'wrap' }}>
+                        {a.mj && <span>🎭 {a.mj.prenom}</span>}
+                        <span>📅 {new Date(a.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}</span>
+                      </div>
+                      <p style={{ color:'#9a9090', fontSize:'0.88rem', lineHeight:1.5, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{a.contenu}</p>
+                      {a.sondage_question && <div style={{ marginTop:'0.5rem', fontSize:'0.75rem', color:'#c9a84c', fontFamily:'Cinzel,serif' }}>📊 Sondage en cours</div>}
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+            <div style={{ textAlign:'center', marginTop:'2rem' }}>
+              <a href="/news" className="btn-outline">Toutes les nouvelles</a>
+            </div>
+          </div>
+        </section>
+      )}
+
+{/* AGENDA */}
       {sessionsFutures.length > 0 && (
         <section style={{ padding:'4rem 1.5rem 5rem', background:'rgba(0,0,0,0.3)' }}>
           <div style={{ maxWidth:1100, margin:'0 auto' }}>
@@ -216,75 +255,6 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
         </section>
       )}
 
-      {/* CAMPAGNES */}
-      {campagnes.length > 0 && (
-        <section style={{ padding:'4rem 1.5rem 5rem', background:'rgba(0,0,0,0.3)' }}>
-          <div style={{ maxWidth:1100, margin:'0 auto' }}>
-            <div style={{ textAlign:'center', marginBottom:'1rem' }}>
-              <p className="cinzel" style={{ fontSize:'0.72rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>NOS ÉPOPÉES</p>
-              <h2 className="section-title">Les Campagnes</h2>
-            </div>
-            <div className="divider-gold"><span>⚔️</span></div>
-            <div className="camp-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:'1.5rem' }}>
-              {campagnes.map(c => (
-                <Link key={c.id} href={`/campagnes/${c.id}`} style={{ textDecoration:'none' }}>
-                  <div className="card-hover" style={{ background:'#1a1714', border:'1px solid rgba(201,168,76,0.15)', borderRadius:2, overflow:'hidden' }}>
-                    <div style={{ height:180, background:c.image_url?`url(${c.image_url}) center/cover`:'linear-gradient(135deg,#2a1505,#0d0b09)', position:'relative' }}>
-                      {!c.image_url && <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'3rem', opacity:0.3 }}>⚔️</div>}
-                      <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(26,23,20,0.9) 0%, transparent 60%)' }} />
-                      <div style={{ position:'absolute', bottom:'1rem', left:'1rem' }}>
-                        <span style={{ fontFamily:'Cinzel,serif', fontSize:'0.62rem', letterSpacing:'0.1em', textTransform:'uppercase', padding:'0.2rem 0.6rem', borderRadius:2, background:c.statut==='active'?'rgba(40,120,40,0.2)':'rgba(80,80,80,0.3)', color:c.statut==='active'?'#80d080':'#9a9090', border:`1px solid ${c.statut==='active'?'rgba(40,120,40,0.4)':'rgba(100,100,100,0.3)'}` }}>{c.statut==='active'?'Active':'Terminée'}</span>
-                      </div>
-                    </div>
-                    <div style={{ padding:'1.25rem' }}>
-                      <h3 className="cinzel" style={{ color:'#c9a84c', fontSize:'1rem', marginBottom:'0.4rem' }}>{c.nom}</h3>
-                      {c.univers && <div style={{ color:'#9a9090', fontSize:'0.78rem', marginBottom:'0.4rem' }}>🌍 {c.univers}</div>}
-                      {c.description && <p style={{ color:'#9a9090', fontSize:'0.88rem', lineHeight:1.5, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{c.description}</p>}
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            <div style={{ textAlign:'center', marginTop:'2.5rem' }}>
-              <Link href="/campagnes" className="btn-outline">Toutes les campagnes</Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* PERSONNAGES */}
-      <section style={{ overflow:'hidden' }}>
-        <div className="perso-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', minHeight:480 }}>
-          <div className="perso-img" style={{ position:'relative', minHeight:480 }}>
-            <div style={{ position:'absolute', inset:0, backgroundImage:'url(https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/images/armes.jpg)', backgroundSize:'cover', backgroundPosition:'center', filter:'brightness(0.75)' }} />
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, transparent 50%, #0d0b09 100%)' }} />
-          </div>
-          <div style={{ background:'#0d0b09', padding:'4rem 2.5rem 4rem 1.5rem', display:'flex', flexDirection:'column', justifyContent:'center' }}>
-            <p className="cinzel" style={{ fontSize:'0.72rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>LES HÉROS</p>
-            <h2 className="section-title" style={{ marginBottom:'1.25rem' }}>Nos Aventuriers</h2>
-            <p style={{ color:'#9a9090', lineHeight:1.8, marginBottom:'1.75rem', fontSize:'1rem' }}>
-              Chaque aventurier laisse sa marque dans les chroniques de la Crypte. Créez votre fiche, rejoignez une campagne et entrez dans la légende.
-            </p>
-            {personnages.length > 0 && (
-              <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem', marginBottom:'1.75rem' }}>
-                {personnages.slice(0,6).map(p => (
-                  <div key={p.id} style={{ display:'flex', alignItems:'center', gap:'0.5rem', background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.2)', borderRadius:2, padding:'0.35rem 0.6rem' }}>
-                    <div style={{ width:26, height:26, borderRadius:'50%', overflow:'hidden', flexShrink:0, background:'rgba(201,168,76,0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.85rem' }}>
-                      {p.avatar_url ? <img src={p.avatar_url} alt={p.nom} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : '🧙'}
-                    </div>
-                    <div className="cinzel" style={{ color:'#e8d5b0', fontSize:'0.72rem' }}>{p.nom}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div style={{ display:'flex', gap:'0.75rem', flexWrap:'wrap' }}>
-              <Link href="/mon-compte" className="btn-red" style={{ fontSize:'0.78rem', padding:'0.7rem 1.5rem' }}>Créer mon personnage</Link>
-              <Link href="/personnages" className="btn-outline" style={{ fontSize:'0.75rem', padding:'0.7rem 1.25rem' }}>Voir tous</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* MJs */}
       <section style={{ padding:'5rem 1.5rem', background:'rgba(0,0,0,0.3)' }}>
         <div style={{ maxWidth:1000, margin:'0 auto' }}>
@@ -318,11 +288,10 @@ export default function Home({ sessions, campagnes, mjs, personnages }) {
 }
 
 export async function getServerSideProps() {
-  const [{ data: mjs }, { data: campagnes }, { data: sessions }, { data: personnages }] = await Promise.all([
+  const [{ data: mjs }, { data: sessions }, { data: newsArticles }] = await Promise.all([
     supabase.from('mj').select('*'),
-    supabase.from('campagnes').select('*').order('created_at',{ascending:false}),
     supabase.from('sessions').select('*,campagnes(nom)').order('date_session',{ascending:false}),
-    supabase.from('personnages').select('*').limit(8)
+    supabase.from('news').select('*,mj(prenom)').eq('publie',true).order('created_at',{ascending:false}).limit(3)
   ])
-  return { props: { mjs:mjs||[], campagnes:campagnes||[], sessions:sessions||[], personnages:personnages||[] } }
+  return { props: { mjs:mjs||[], sessions:sessions||[], newsArticles:newsArticles||[] } }
 }
