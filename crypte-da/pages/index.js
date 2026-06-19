@@ -9,11 +9,23 @@ const LOGO = 'https://djvckwngvnwhftdvarwu.supabase.co/storage/v1/object/public/
 
 export default function Home({ sessions, mjs, newsArticles }) {
   const [scrolled, setScrolled] = useState(false)
+  const [subEmail, setSubEmail] = useState('')
+  const [subMsg, setSubMsg] = useState(null)
+  const [subLoading, setSubLoading] = useState(false)
   const [user, setUser] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => { setUser(getUser()) }, [])
+
+  const sAbonner = async () => {
+    if (!subEmail.includes('@')) { setSubMsg({ type:'error', text:'Email invalide.' }); return }
+    setSubLoading(true)
+    const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email:subEmail }) })
+    setSubLoading(false)
+    if (r.ok) { setSubMsg({ type:'success', text:'✅ Inscription confirmée ! Tu recevras les prochaines nouvelles.' }); setSubEmail('') }
+    else setSubMsg({ type:'error', text:'Une erreur est survenue.' })
+  }
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 60)
     window.addEventListener('scroll', fn)
@@ -274,6 +286,20 @@ export default function Home({ sessions, mjs, newsArticles }) {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ABONNEMENT */}
+      <section style={{ padding:'3.5rem 1.5rem', background:'rgba(0,0,0,0.4)', textAlign:'center' }}>
+        <div style={{ maxWidth:540, margin:'0 auto' }}>
+          <p style={{ fontFamily:'Cinzel,sans-serif', fontSize:'0.72rem', letterSpacing:'0.3em', color:'#c9a84c', marginBottom:'0.75rem', opacity:0.8 }}>RESTEZ INFORMÉ</p>
+          <h2 style={{ fontFamily:'Cinzel,serif', fontSize:'clamp(1.2rem,3vw,1.6rem)', color:'#c9a84c', marginBottom:'0.75rem' }}>Notifications par email</h2>
+          <p style={{ color:'#9a9090', marginBottom:'1.5rem', lineHeight:1.7 }}>Reçois une notification dès qu'une nouvelle est publiée sur la Crypte.</p>
+          <div style={{ display:'flex', gap:'0.75rem', maxWidth:420, margin:'0 auto', flexWrap:'wrap', justifyContent:'center' }}>
+            <input style={{ flex:1, minWidth:220, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(201,168,76,0.3)', borderRadius:2, color:'#e8d5b0', padding:'0.7rem 1rem', fontFamily:'Georgia,serif', fontSize:'1rem', outline:'none' }} value={subEmail} onChange={e=>{ setSubEmail(e.target.value); setSubMsg(null) }} onKeyDown={e=>e.key==='Enter'&&sAbonner()} placeholder="ton@email.fr" type="email" />
+            <button onClick={sAbonner} disabled={subLoading} className="btn-red" style={{ flexShrink:0, padding:'0.7rem 1.5rem' }}>{subLoading?'...':'S'abonner'}</button>
+          </div>
+          {subMsg && <div style={{ marginTop:'1rem', color:subMsg.type==='error'?'#e07070':'#80d080', fontSize:'0.9rem' }}>{subMsg.text}</div>}
         </div>
       </section>
 

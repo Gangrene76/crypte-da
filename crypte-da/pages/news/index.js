@@ -1,8 +1,21 @@
+import { useState } from 'react'
 import Layout from '../../components/Layout'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
 
 export default function News({ articles }) {
+  const [subEmail, setSubEmail] = useState('')
+  const [subMsg, setSubMsg] = useState(null)
+  const [subLoading, setSubLoading] = useState(false)
+
+  const sAbonner = async () => {
+    if (!subEmail.includes('@')) { setSubMsg({ type:'error', text:'Email invalide.' }); return }
+    setSubLoading(true)
+    const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email:subEmail }) })
+    setSubLoading(false)
+    if (r.ok) { setSubMsg({ type:'success', text:'✅ Inscription confirmée !' }); setSubEmail('') }
+    else setSubMsg({ type:'error', text:'Erreur lors de l'inscription.' })
+  }
   return (
     <Layout>
       <div style={{ maxWidth:1000, margin:'0 auto', padding:'3rem 1.5rem 4rem' }}>
@@ -49,6 +62,18 @@ export default function News({ articles }) {
             ))}
           </div>
         )}
+      </div>
+
+        {/* Abonnement */}
+        <div style={{ background:'rgba(0,0,0,0.3)', margin:'2rem 0 0', padding:'2rem', borderRadius:2, textAlign:'center' }}>
+          <h3 style={{ color:'var(--gold)', fontFamily:'Cinzel,serif', fontSize:'1rem', marginBottom:'0.5rem' }}>📧 Notifications par email</h3>
+          <p style={{ color:'var(--ash)', fontSize:'0.9rem', marginBottom:'1rem' }}>Reçois un email à chaque nouvelle publication.</p>
+          <div style={{ display:'flex', gap:'0.75rem', maxWidth:400, margin:'0 auto', flexWrap:'wrap', justifyContent:'center' }}>
+            <input className="input-field" type="email" value={subEmail} onChange={e=>{ setSubEmail(e.target.value); setSubMsg(null) }} onKeyDown={e=>e.key==='Enter'&&sAbonner()} placeholder="ton@email.fr" style={{ flex:1, minWidth:200 }} />
+            <button className="btn-primary" onClick={sAbonner} disabled={subLoading} style={{ flexShrink:0 }}>{subLoading?'...':'S'abonner'}</button>
+          </div>
+          {subMsg && <div style={{ marginTop:'0.75rem', color:subMsg.type==='error'?'#e07070':'#80d080', fontSize:'0.88rem' }}>{subMsg.text}</div>}
+        </div>
       </div>
     </Layout>
   )

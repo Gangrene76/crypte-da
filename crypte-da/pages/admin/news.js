@@ -42,8 +42,17 @@ export default function AdminNews() {
       sondage_choix: form.sondage_question && choixFiltres.length >= 2 ? choixFiltres : null
     }
     if (editing === 'new') {
-      const { error } = await supabase.from('news').insert(data)
-      if (error) setMsg({ type:'error', text:error.message }); else { setMsg({ type:'success', text:'Article publié !' }); setEditing(null); load() }
+      const { data: newArticle, error } = await supabase.from('news').insert(data).select().single()
+      if (error) { setMsg({ type:'error', text:error.message }) } else {
+        if (data.publie && newArticle) {
+          try {
+            const r = await fetch('/api/send-news-notification', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ newsId: newArticle.id }) })
+            const result = await r.json()
+            setMsg({ type:'success', text:`Article publié ! ${result.sent > 0 ? `📧 ${result.sent} notification${result.sent>1?'s':''} envoyée${result.sent>1?'s':''}.` : ''}` })
+          } catch { setMsg({ type:'success', text:'Article publié !' }) }
+        } else { setMsg({ type:'success', text:'Article enregistré !' }) }
+        setEditing(null); load()
+      }
     } else {
       const { error } = await supabase.from('news').update(data).eq('id', editing)
       if (error) setMsg({ type:'error', text:error.message }); else { setMsg({ type:'success', text:'Enregistré !' }); setEditing(null); load() }
