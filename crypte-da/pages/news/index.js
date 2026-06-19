@@ -64,13 +64,14 @@ export default function News({ articles }) {
         )}
       </div>
 
-        {/* Abonnement */}
-        <div style={{ background:'rgba(0,0,0,0.3)', margin:'2rem 0 0', padding:'2rem', borderRadius:2, textAlign:'center' }}>
-          <h3 style={{ color:'var(--gold)', fontFamily:'Cinzel,serif', fontSize:'1rem', marginBottom:'0.5rem' }}>📧 Notifications par email</h3>
-          <p style={{ color:'var(--ash)', fontSize:'0.9rem', marginBottom:'1rem' }}>Reçois un email à chaque nouvelle publication.</p>
+      {/* Abonnement */}
+      <div style={{ background:'rgba(0,0,0,0.4)', padding:'3rem 1.5rem', textAlign:'center' }}>
+        <div style={{ maxWidth:480, margin:'0 auto' }}>
+          <h3 style={{ color:'var(--gold)', fontFamily:'Cinzel,serif', fontSize:'1.1rem', marginBottom:'0.5rem' }}>📧 Notifications par email</h3>
+          <p style={{ color:'var(--ash)', fontSize:'0.9rem', marginBottom:'1.25rem', lineHeight:1.6 }}>Reçois un email à chaque nouvelle publication sur la Crypte.</p>
           <div style={{ display:'flex', gap:'0.75rem', maxWidth:400, margin:'0 auto', flexWrap:'wrap', justifyContent:'center' }}>
             <input className="input-field" type="email" value={subEmail} onChange={e=>{ setSubEmail(e.target.value); setSubMsg(null) }} onKeyDown={e=>e.key==='Enter'&&sAbonner()} placeholder="ton@email.fr" style={{ flex:1, minWidth:200 }} />
-            <button className="btn-primary" onClick={sAbonner} disabled={subLoading} style={{ flexShrink:0 }}>{subLoading?'...':'S'abonner'}</button>
+            <button className="btn-primary" onClick={sAbonner} disabled={subLoading} style={{ flexShrink:0 }}>{subLoading ? '...' : "S'abonner"}</button>
           </div>
           {subMsg && <div style={{ marginTop:'0.75rem', color:subMsg.type==='error'?'#e07070':'#80d080', fontSize:'0.88rem' }}>{subMsg.text}</div>}
         </div>
