@@ -297,7 +297,7 @@ export default function Home({ sessions, mjs, newsArticles }) {
           <p style={{ color:'#9a9090', marginBottom:'1.5rem', lineHeight:1.7 }}>Reçois une notification dès qu'une nouvelle est publiée sur la Crypte.</p>
           <div style={{ display:'flex', gap:'0.75rem', maxWidth:420, margin:'0 auto', flexWrap:'wrap', justifyContent:'center' }}>
             <input style={{ flex:1, minWidth:220, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(201,168,76,0.3)', borderRadius:2, color:'#e8d5b0', padding:'0.7rem 1rem', fontFamily:'Georgia,serif', fontSize:'1rem', outline:'none' }} value={subEmail} onChange={e=>{ setSubEmail(e.target.value); setSubMsg(null) }} onKeyDown={e=>e.key==='Enter'&&sAbonner()} placeholder="ton@email.fr" type="email" />
-            <button onClick={sAbonner} disabled={subLoading} className="btn-red" style={{ flexShrink:0, padding:'0.7rem 1.5rem' }}>{subLoading?'...':'S'abonner'}</button>
+            <button onClick={sAbonner} disabled={subLoading} className="btn-red" style={{ flexShrink:0, padding:'0.7rem 1.5rem' }}>{subLoading ? '...' : `S’abonner`}</button>
           </div>
           {subMsg && <div style={{ marginTop:'1rem', color:subMsg.type==='error'?'#e07070':'#80d080', fontSize:'0.9rem' }}>{subMsg.text}</div>}
         </div>
