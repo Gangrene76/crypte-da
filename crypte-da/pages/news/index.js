@@ -14,7 +14,7 @@ export default function News({ articles }) {
     const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email:subEmail }) })
     setSubLoading(false)
     if (r.ok) { setSubMsg({ type:'success', text:'✅ Inscription confirmée !' }); setSubEmail('') }
-    else setSubMsg({ type:'error', text:'Erreur lors de l'inscription.' })
+    else setSubMsg({ type:'error', text:"Erreur lors de l'inscription." })
   }
   return (
     <Layout>
